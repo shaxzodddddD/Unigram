@@ -1,0 +1,5409 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<title>Unigram — Kelajak Tarmog'i</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+/* ============================================================================
+   UNIGRAM v4.0 — Complete CSS
+   Barcha uslublar bir joyda
+   ============================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+    --bg: #0a0e1a;
+    --bg-2: #131826;
+    --bg-3: #1e2436;
+    --bg-4: #2a3048;
+    --text: #f1f5f9;
+    --text-muted: #8892a8;
+    --text-dim: #5a6478;
+    --border: rgba(255,255,255,0.08);
+    --border-hover: rgba(255,255,255,0.15);
+    --primary: #00F0FF;
+    --primary-dark: #00b8c4;
+    --primary-glow: rgba(0,240,255,0.4);
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --purple: #a855f7;
+    --pink: #ec4899;
+    --gold: #fbbf24;
+    --silver: #cbd5e1;
+    --bronze: #cd7f32;
+    --radius: 14px;
+    --radius-lg: 20px;
+    --shadow: 0 4px 20px rgba(0,0,0,0.4);
+    --shadow-glow: 0 0 30px rgba(0,240,255,0.15);
+    --transition: 0.2s ease;
+}
+
+[data-theme="light"] {
+    --bg: #f8fafc;
+    --bg-2: #ffffff;
+    --bg-3: #f1f5f9;
+    --bg-4: #e2e8f0;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+    --border: rgba(0,0,0,0.08);
+    --border-hover: rgba(0,0,0,0.15);
+    --shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.5;
+    transition: background 0.3s, color 0.3s;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-3); }
+::-webkit-scrollbar-thumb { background: var(--text-dim); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+/* ============ LAYOUT ============ */
+
+.app-shell {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+}
+
+.sidebar {
+    background: var(--bg-2);
+    border-right: 1px solid var(--border);
+    padding: 20px 16px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    z-index: 50;
+}
+
+.main-panel {
+    padding: 24px;
+    max-width: 1280px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.mobile-header {
+    display: none;
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+}
+
+.mobile-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-2);
+    border-top: 1px solid var(--border);
+    padding: 8px 4px;
+    justify-content: space-around;
+    z-index: 100;
+}
+
+.mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 10px;
+    border-radius: 10px;
+    color: var(--text-muted);
+    font-size: 9.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition);
+    min-width: 56px;
+    border: none;
+    background: transparent;
+}
+
+.mobile-nav-item.active {
+    color: var(--primary);
+    background: rgba(0,240,255,0.1);
+}
+
+@media (max-width: 900px) {
+    .app-shell { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .mobile-header { display: flex; }
+    .mobile-nav { display: flex; }
+    .main-panel { padding: 16px; padding-bottom: 90px; }
+}
+
+/* ============ NAV ============ */
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 8px 20px;
+}
+
+.brand-mark {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,240,255,0.08);
+    border: 1px solid rgba(0,240,255,0.3);
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
+.brand-mark svg {
+    width: 24px;
+    height: 24px;
+    color: var(--primary);
+}
+
+.brand-name {
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+}
+
+.nav-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 14px;
+    transition: all var(--transition);
+    position: relative;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+}
+
+.nav-item:hover {
+    background: var(--bg-3);
+    color: var(--text);
+}
+
+.nav-item.active {
+    background: linear-gradient(135deg, rgba(0,240,255,0.12), rgba(0,184,196,0.12));
+    color: var(--primary);
+}
+
+.nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    background: var(--primary);
+    border-radius: 0 4px 4px 0;
+}
+
+.nav-icon {
+    font-size: 19px;
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.nav-badge {
+    margin-left: auto;
+    background: var(--danger);
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 99px;
+    min-width: 18px;
+    text-align: center;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.user-mini {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.user-mini:hover {
+    background: var(--bg-3);
+}
+
+.user-avatar-sm {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--purple));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.user-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.user-info-name {
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-info-level {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.balance-chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 14px;
+    background: linear-gradient(135deg, rgba(251,191,36,0.15), rgba(245,158,11,0.15));
+    border: 1px solid rgba(251,191,36,0.3);
+    color: var(--gold);
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 800;
+    margin-top: 10px;
+}
+
+/* ============ BUTTONS ============ */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: all var(--transition);
+    font-family: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #00F0FF, #00b8c4);
+    color: #0a0e1a;
+    box-shadow: 0 4px 16px rgba(0,240,255,0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(0,240,255,0.4);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn-ghost:hover {
+    background: var(--bg-3);
+    border-color: var(--border-hover);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 8px;
+}
+
+.btn-lg {
+    padding: 14px 28px;
+    font-size: 16px;
+    border-radius: 12px;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+/* ============ FORMS ============ */
+
+.input {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    transition: all var(--transition);
+    font-family: inherit;
+}
+
+.input:focus {
+    border-color: var(--primary);
+    background: var(--bg-2);
+    box-shadow: 0 0 0 4px rgba(0,240,255,0.08);
+}
+
+.input::placeholder {
+    color: var(--text-dim);
+}
+
+textarea.input {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-field {
+    margin-bottom: 16px;
+}
+
+.form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.input-wrap {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+}
+
+/* ============ CARDS ============ */
+
+.card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    transition: all var(--transition);
+}
+
+.card:hover {
+    border-color: rgba(0,240,255,0.25);
+}
+
+.card-interactive {
+    cursor: pointer;
+}
+
+.card-interactive:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.card-flat {
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+}
+
+/* ============ TABS ============ */
+
+.tabs {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--bg-3);
+    border-radius: 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    max-width: 100%;
+    width: fit-content;
+}
+
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+    padding: 8px 14px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--transition);
+    font-family: inherit;
+}
+
+.tab:hover {
+    color: var(--text);
+}
+
+.tab.active {
+    background: var(--bg-2);
+    color: var(--primary);
+    box-shadow: var(--shadow);
+}
+
+.tabs-full {
+    width: 100%;
+}
+
+.tabs-full .tab {
+    flex: 1;
+    text-align: center;
+}
+
+/* ============ ANIMATED CHECKMARK ============ */
+
+@keyframes checkPulse {
+    0%, 100% {
+        text-shadow: 0 0 8px rgba(0,240,255,0.6);
+        transform: scale(1);
+    }
+    50% {
+        text-shadow: 0 0 16px rgba(0,240,255,1), 0 0 24px rgba(0,240,255,0.6);
+        transform: scale(1.08);
+    }
+}
+
+@keyframes checkPulseGold {
+    0%, 100% {
+        text-shadow: 0 0 8px rgba(251,191,36,0.6);
+        transform: scale(1);
+    }
+    50% {
+        text-shadow: 0 0 16px rgba(251,191,36,1), 0 0 24px rgba(251,191,36,0.6);
+        transform: scale(1.08);
+    }
+}
+
+.verified {
+    color: var(--primary);
+    animation: checkPulse 2s infinite;
+    display: inline-block;
+    font-weight: 900;
+}
+
+.verified-gold {
+    color: var(--gold);
+    animation: checkPulseGold 2s infinite;
+    display: inline-block;
+    font-weight: 900;
+}
+
+/* ============ TOAST ============ */
+
+.toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translate(-50%, 120px);
+    background: var(--bg-4);
+    color: var(--text);
+    padding: 14px 24px;
+    border-radius: 99px;
+    font-weight: 700;
+    font-size: 14px;
+    z-index: 2000;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    max-width: 90vw;
+    pointer-events: none;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.toast.show {
+    transform: translate(-50%, 0);
+    opacity: 1;
+}
+
+.toast.success {
+    border-color: var(--success);
+    color: var(--success);
+}
+
+.toast.error {
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+/* ============ MODAL ============ */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    max-width: 520px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: popIn 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0.92) translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 900;
+    margin-bottom: 16px;
+    letter-spacing: -0.3px;
+}
+
+/* ============ ANIMATIONS ============ */
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-up {
+    animation: fadeUp 0.35s ease-out;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes livePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+.bounce {
+    animation: bounce 1s infinite;
+}
+
+.pulse {
+    animation: pulse 1.5s infinite;
+}
+
+/* ============ PAGE HEADERS ============ */
+
+.page-header {
+    margin-bottom: 24px;
+}
+
+.page-title {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.8px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.page-subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+/* ============ GRID UTILITIES ============ */
+
+.grid-1 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+.grid-auto-sm { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+
+@media (max-width: 900px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+    .grid-auto { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+}
+
+/* ============ UTILITY CLASSES ============ */
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-1 { gap: 4px; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+.gap-6 { gap: 24px; }
+.flex-1 { flex: 1; }
+.min-w-0 { min-width: 0; }
+
+.text-xs { font-size: 11px; }
+.text-sm { font-size: 13px; }
+.text-base { font-size: 15px; }
+.text-lg { font-size: 18px; }
+.text-xl { font-size: 22px; }
+.text-2xl { font-size: 28px; }
+.text-3xl { font-size: 34px; }
+
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+.font-black { font-weight: 900; }
+
+.text-muted { color: var(--text-muted); }
+.text-dim { color: var(--text-dim); }
+.text-primary { color: var(--primary); }
+.text-success { color: var(--success); }
+.text-danger { color: var(--danger); }
+.text-warning { color: var(--warning); }
+.text-gold { color: var(--gold); }
+.text-purple { color: var(--purple); }
+
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.mb-1 { margin-bottom: 4px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+.mb-4 { margin-bottom: 16px; }
+.mb-6 { margin-bottom: 24px; }
+.mt-2 { margin-top: 8px; }
+.mt-4 { margin-top: 16px; }
+.mt-6 { margin-top: 24px; }
+
+.hidden { display: none !important; }
+
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ============ AUTH PAGE ============ */
+
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: radial-gradient(900px 500px at 10% -10%, rgba(0,240,255,0.12), transparent 60%),
+                radial-gradient(700px 400px at 100% 0%, rgba(168,85,247,0.12), transparent 60%),
+                var(--bg);
+}
+
+.auth-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 36px 32px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    animation: popIn 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+.auth-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.auth-logo-mark {
+    width: 88px;
+    height: 88px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,240,255,0.06);
+    border: 1px solid rgba(0,240,255,0.3);
+    border-radius: 22px;
+    box-shadow: 0 0 30px rgba(0,240,255,0.2);
+    animation: bounce 3s infinite;
+}
+
+.auth-logo-mark svg {
+    width: 56px;
+    height: 56px;
+    color: var(--primary);
+    filter: drop-shadow(0 0 12px rgba(0,240,255,0.6));
+}
+
+.auth-title {
+    font-size: 32px;
+    font-weight: 900;
+    text-align: center;
+    letter-spacing: -1.2px;
+    background: linear-gradient(135deg, var(--primary), var(--purple));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 6px;
+}
+
+.auth-subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 28px;
+    font-weight: 500;
+}
+
+.auth-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--bg-3);
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 10px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: inherit;
+}
+
+.auth-tab.active {
+    background: var(--bg-2);
+    color: var(--primary);
+    box-shadow: var(--shadow);
+}
+
+.password-strength {
+    height: 6px;
+    background: var(--bg-3);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.password-strength-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--danger);
+    border-radius: 99px;
+    transition: all 0.3s;
+}
+
+.demo-info {
+    margin-top: 20px;
+    padding: 12px;
+    background: var(--bg-3);
+    border-radius: 10px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+
+.demo-info code {
+    background: var(--bg-4);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--primary);
+}
+
+/* ============ POST ============ */
+
+.post-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    margin-bottom: 16px;
+    animation: fadeUp 0.3s;
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.post-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--purple));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.post-author {
+    flex: 1;
+    min-width: 0;
+}
+
+.post-author-name {
+    font-weight: 700;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.post-time {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.post-text {
+    font-size: 15px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin-bottom: 12px;
+}
+
+.post-video {
+    width: 100%;
+    height: 280px;
+    background: #000;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.post-video::before {
+    content: '▶';
+    position: absolute;
+    font-size: 64px;
+    color: rgba(255,255,255,0.85);
+    text-shadow: 0 4px 20px rgba(0,0,0,0.8);
+    transition: all 0.3s;
+}
+
+.post-video:hover::before {
+    transform: scale(1.15);
+}
+
+.post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.post-tag {
+    padding: 4px 12px;
+    background: rgba(0,240,255,0.1);
+    color: var(--primary);
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all var(--transition);
+    font-family: inherit;
+}
+
+.post-tag:hover {
+    background: rgba(0,240,255,0.2);
+}
+
+.post-actions {
+    display: flex;
+    gap: 6px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.post-action {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: inherit;
+}
+
+.post-action:hover {
+    background: var(--bg-3);
+    color: var(--text);
+}
+
+.post-action.liked {
+    color: var(--danger);
+}
+
+.post-action.saved {
+    color: var(--primary);
+}
+
+/* ============ COMPOSER ============ */
+
+.composer {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.composer-top {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.composer textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    resize: none;
+    min-height: 60px;
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.5;
+    padding-top: 8px;
+}
+
+.composer textarea::placeholder {
+    color: var(--text-dim);
+}
+
+.composer-bar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+
+.composer-tool {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: inherit;
+}
+
+.composer-tool:hover {
+    background: var(--bg-3);
+    color: var(--text);
+}
+
+.mood-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(0,240,255,0.1);
+    color: var(--primary);
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 8px;
+}
+
+.mood-chip button {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    opacity: 0.7;
+    margin-left: 4px;
+    padding: 0;
+    font-size: 12px;
+}
+
+.mood-chip button:hover {
+    opacity: 1;
+}
+
+/* ============ STORIES ============ */
+
+.stories-bar {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding: 4px 0 20px;
+    scrollbar-width: none;
+    margin-bottom: 8px;
+}
+
+.stories-bar::-webkit-scrollbar { display: none; }
+
+.story {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 70px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.story-ring {
+    width: 66px;
+    height: 66px;
+    border-radius: 50%;
+    padding: 2px;
+    background: linear-gradient(135deg, var(--primary), var(--purple), var(--pink));
+    transition: transform var(--transition);
+}
+
+.story:hover .story-ring {
+    transform: scale(1.05);
+}
+
+.story-ring.seen {
+    background: var(--bg-4);
+}
+
+.story-ring.add {
+    background: var(--bg-3);
+    border: 2px dashed var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: var(--primary);
+    font-weight: 900;
+}
+
+.story-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--bg-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    border: 2px solid var(--bg-2);
+}
+
+.story-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-align: center;
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ============ CRYPTO ============ */
+
+.crypto-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    transition: all var(--transition);
+}
+
+.crypto-card:hover {
+    border-color: rgba(0,240,255,0.3);
+}
+
+.crypto-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.crypto-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--purple));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 12px;
+    color: var(--bg);
+    flex-shrink: 0;
+}
+
+.crypto-price {
+    font-family: 'Space Mono', monospace;
+    font-weight: 800;
+    font-size: 15px;
+    text-align: right;
+}
+
+.crypto-change {
+    font-size: 12px;
+    font-weight: 700;
+    text-align: right;
+}
+
+.price-up { color: var(--success); }
+.price-down { color: var(--danger); }
+
+.crypto-holdings {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    padding: 8px;
+    background: var(--bg-3);
+    border-radius: 8px;
+}
+
+/* ============ PRODUCT ============ */
+
+.product-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    transition: all var(--transition);
+}
+
+.product-card:hover {
+    border-color: rgba(0,240,255,0.3);
+    transform: translateY(-2px);
+}
+
+.product-img {
+    width: 100%;
+    height: 160px;
+    background: linear-gradient(135deg, var(--bg-3), var(--bg-4));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 56px;
+    margin-bottom: 12px;
+}
+
+.product-name {
+    font-weight: 800;
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.product-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.product-price {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--primary);
+}
+
+.cart-badge {
+    background: var(--danger);
+    color: white;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin-left: 6px;
+}
+
+/* ============ AI ============ */
+
+.ai-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.ai-card:hover {
+    border-color: rgba(0,240,255,0.4);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-glow);
+}
+
+.ai-emoji {
+    font-size: 44px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.ai-name {
+    font-weight: 800;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.ai-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.chat-container {
+    max-width: 760px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 130px);
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.chat-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: var(--bg-3);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.chat-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.chat-bubble {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.5;
+    word-wrap: break-word;
+    animation: fadeUp 0.2s;
+}
+
+.chat-bubble.me {
+    align-self: flex-end;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: var(--bg);
+    border-bottom-right-radius: 4px;
+    font-weight: 600;
+}
+
+.chat-bubble.ai {
+    align-self: flex-start;
+    background: var(--bg-3);
+    color: var(--text);
+    border-bottom-left-radius: 4px;
+}
+
+.chat-input-bar {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    background: var(--bg-3);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.chat-input-bar input {
+    flex: 1;
+    padding: 10px 16px;
+    border-radius: 99px;
+    border: 1.5px solid var(--border);
+    background: var(--bg-2);
+    color: var(--text);
+    outline: none;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.chat-input-bar input:focus {
+    border-color: var(--primary);
+}
+
+.typing-indicator {
+    display: inline-flex;
+    gap: 4px;
+    padding: 12px 16px;
+    background: var(--bg-3);
+    border-radius: 18px;
+    border-bottom-left-radius: 4px;
+    align-self: flex-start;
+}
+
+.typing-indicator span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    animation: bounce 1.2s infinite;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
+
+/* ============ GAMES ============ */
+
+.game-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.game-card:hover {
+    border-color: rgba(0,240,255,0.4);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-glow);
+}
+
+.game-icon {
+    font-size: 44px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.game-name {
+    font-weight: 800;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.game-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.game-area {
+    background: var(--bg-3);
+    border-radius: var(--radius-lg);
+    padding: 32px 20px;
+    min-height: 340px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.game-btn {
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 800;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-btn:active {
+    transform: scale(0.94);
+}
+
+.game-btn:hover {
+    filter: brightness(1.1);
+}
+
+.game-score {
+    font-size: 64px;
+    font-weight: 900;
+    color: var(--primary);
+    margin-bottom: 8px;
+    font-family: 'Space Mono', monospace;
+}
+
+.game-timer {
+    font-size: 16px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+
+.game-message {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 16px;
+}
+
+.game-message.success { color: var(--success); }
+.game-message.error { color: var(--danger); }
+
+.memory-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 70px);
+    gap: 8px;
+    margin: 16px 0;
+}
+
+.memory-card {
+    width: 70px;
+    height: 70px;
+    border-radius: 10px;
+    background: var(--bg-2);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 900;
+    color: var(--text-muted);
+}
+
+.memory-card.flipped {
+    background: var(--primary);
+    color: var(--bg);
+    border-color: var(--primary);
+    transform: rotateY(180deg);
+}
+
+.memory-card.matched {
+    background: var(--success);
+    color: white;
+    border-color: var(--success);
+    cursor: default;
+    opacity: 0.6;
+}
+
+.color-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 90px);
+    gap: 10px;
+    margin: 16px 0;
+}
+
+.color-btn {
+    width: 90px;
+    height: 90px;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.color-btn:hover {
+    transform: scale(1.05);
+}
+
+.color-btn:active {
+    transform: scale(0.95);
+}
+
+.letter-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    max-width: 360px;
+    margin: 16px auto;
+}
+
+.letter-btn {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    border: none;
+    background: var(--primary);
+    color: var(--bg);
+    font-weight: 900;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.letter-btn:disabled {
+    background: var(--bg-4);
+    color: var(--text-dim);
+    cursor: not-allowed;
+}
+
+.letter-btn:hover:not(:disabled) {
+    background: var(--primary-dark);
+}
+
+.word-display {
+    font-family: 'Space Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 8px;
+    margin: 16px 0;
+    color: var(--primary);
+}
+
+/* ============ LEADERBOARD ============ */
+
+.rank-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.rank-item:last-child {
+    border-bottom: none;
+}
+
+.rank-badge {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 900;
+    flex-shrink: 0;
+}
+
+.rank-1 { background: linear-gradient(135deg, var(--gold), #d97706); color: #0a0e1a; }
+.rank-2 { background: linear-gradient(135deg, var(--silver), #94a3b8); color: #0a0e1a; }
+.rank-3 { background: linear-gradient(135deg, var(--bronze), #a16207); color: #0a0e1a; }
+.rank-default { background: var(--bg-3); color: var(--text-muted); }
+
+.rank-avatar {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.rank-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.rank-name {
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.rank-value {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.rank-crown {
+    color: var(--gold);
+    font-size: 18px;
+}
+
+/* ============ STREAMS ============ */
+
+.stream-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all var(--transition);
+    position: relative;
+}
+
+.stream-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-glow);
+}
+
+.stream-thumbnail {
+    height: 200px;
+    background: linear-gradient(135deg, var(--bg-3), var(--bg-4));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    position: relative;
+}
+
+.live-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--danger);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 900;
+    animation: livePulse 1.5s infinite;
+    z-index: 2;
+}
+
+.viewers-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    backdrop-filter: blur(4px);
+    z-index: 2;
+}
+
+.stream-info {
+    padding: 14px;
+}
+
+.stream-title {
+    font-weight: 800;
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.stream-author {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* ============ SUBSCRIPTIONS ============ */
+
+.plan-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    position: relative;
+    transition: all var(--transition);
+}
+
+.plan-card.premium {
+    border-color: rgba(0,240,255,0.4);
+    box-shadow: 0 0 30px rgba(0,240,255,0.15);
+}
+
+.plan-card.vip {
+    border-color: rgba(168,85,247,0.4);
+    box-shadow: 0 0 30px rgba(168,85,247,0.15);
+}
+
+.plan-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 5px 14px;
+    border-radius: 0 var(--radius-lg) 0 12px;
+    font-size: 11px;
+    font-weight: 900;
+    background: var(--primary);
+    color: var(--bg);
+}
+
+.plan-icon {
+    font-size: 48px;
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.plan-name {
+    font-size: 20px;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.plan-price {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 900;
+    margin-bottom: 16px;
+}
+
+.plan-price small {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.plan-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.plan-features li {
+    padding: 6px 0;
+    display: flex;
+    gap: 8px;
+}
+
+/* ============ PROFILE ============ */
+
+.profile-hero {
+    background: linear-gradient(135deg, rgba(0,240,255,0.1), rgba(168,85,247,0.1));
+    border-radius: var(--radius-lg);
+    padding: 32px 20px;
+    text-align: center;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+}
+
+.profile-avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--purple));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 44px;
+    margin: 0 auto 12px;
+    border: 4px solid var(--bg-2);
+    box-shadow: 0 8px 30px rgba(0,240,255,0.3);
+}
+
+.profile-name {
+    font-size: 24px;
+    font-weight: 900;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.profile-email {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.profile-plan {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--bg-3);
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.profile-stat {
+    padding: 12px;
+    background: var(--bg-2);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+.profile-stat-value {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--primary);
+}
+
+.profile-stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* ============ SETTINGS ============ */
+
+.settings-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.settings-row:last-child {
+    border-bottom: none;
+}
+
+.settings-icon {
+    font-size: 22px;
+    width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.settings-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.settings-info-title {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.settings-info-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* ============ EMPTY ============ */
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.empty-icon {
+    font-size: 64px;
+    opacity: 0.5;
+    margin-bottom: 12px;
+}
+
+.empty-text {
+    font-size: 14px;
+}
+
+/* ============ SKELETON ============ */
+
+.skeleton {
+    background: linear-gradient(90deg, var(--bg-3) 0%, var(--bg-4) 50%, var(--bg-3) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 8px;
+}
+
+/* ============ SEARCH ============ */
+
+.search-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.search-bar input {
+    flex: 1;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: var(--bg-2);
+    color: var(--text);
+    outline: none;
+    font-family: inherit;
+}
+
+.search-bar input:focus {
+    border-color: var(--primary);
+}
+
+/* ============ FLAGS / MISC ============ */
+
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.badge-primary { background: rgba(0,240,255,0.15); color: var(--primary); }
+.badge-success { background: rgba(16,185,129,0.15); color: var(--success); }
+.badge-danger { background: rgba(239,68,68,0.15); color: var(--danger); }
+.badge-gold { background: rgba(251,191,36,0.15); color: var(--gold); }
+.badge-purple { background: rgba(168,85,247,0.15); color: var(--purple); }
+
+.stat-block {
+    padding: 14px;
+    background: var(--bg-3);
+    border-radius: 12px;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--primary);
+    font-family: 'Space Mono', monospace;
+}
+
+.stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* ============ END CSS ============ */
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+<div id="modal-root"></div>
+<div id="toast" class="toast"></div>
+
+<script>
+/* ============================================================================
+   UNIGRAM v4.0 — Complete Application Logic
+   ============================================================================ */
+
+'use strict';
+
+/* ============================================================================
+   SECTION 1: UTILITIES
+   ============================================================================ */
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
+const now = () => Date.now();
+
+function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+}
+
+function fmt(n) {
+    if (n >= 1e9) return (n / 1e9).toFixed(2).replace(/\.?0+$/, '') + 'B';
+    if (n >= 1e6) return (n / 1e6).toFixed(2).replace(/\.?0+$/, '') + 'M';
+    if (n >= 1e3) return (n / 1e3).toFixed(2).replace(/\.?0+$/, '') + 'K';
+    return String(n);
+}
+
+function fmtPrice(n) {
+    return '$' + Number(n).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+function fmtNum(n) {
+    return Number(n).toLocaleString('en-US');
+}
+
+function timeAgo(ts) {
+    const d = Math.floor((now() - ts) / 1000);
+    if (d < 0) return 'hozir';
+    if (d < 60) return 'hozir';
+    if (d < 3600) return Math.floor(d / 60) + ' daq';
+    if (d < 86400) return Math.floor(d / 3600) + ' soat';
+    if (d < 604800) return Math.floor(d / 86400) + ' kun';
+    return new Date(ts).toLocaleDateString('uz-UZ', {
+        day: '2-digit',
+        month: 'short'
+    });
+}
+
+function debounce(fn, ms) {
+    let t;
+    return function (...args) {
+        clearTimeout(t);
+        t = setTimeout(() => fn.apply(this, args), ms);
+    };
+}
+
+function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function toast(msg, type = 'info', duration = 2400) {
+    const el = $('#toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.className = 'toast show ' + (type !== 'info' ? type : '');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => {
+        el.classList.remove('show');
+    }, duration);
+}
+
+/* ============================================================================
+   SECTION 2: LOCAL STORAGE
+   ============================================================================ */
+
+const LS = {
+    prefix: 'unigram_',
+
+    get(key, def = null) {
+        try {
+            const val = localStorage.getItem(this.prefix + key);
+            return val !== null ? JSON.parse(val) : def;
+        } catch (e) {
+            console.warn('LS get error:', e);
+            return def;
+        }
+    },
+
+    set(key, val) {
+        try {
+            localStorage.setItem(this.prefix + key, JSON.stringify(val));
+            return true;
+        } catch (e) {
+            console.error('LS set error:', e);
+            toast('❌ Xotira to\'ldi', 'error');
+            return false;
+        }
+    },
+
+    del(key) {
+        localStorage.removeItem(this.prefix + key);
+    },
+
+    clear() {
+        const keys = Object.keys(localStorage);
+        keys.forEach(k => {
+            if (k.startsWith(this.prefix)) localStorage.removeItem(k);
+        });
+    }
+};
+
+/* ============================================================================
+   SECTION 3: CONSTANTS
+   ============================================================================ */
+
+const AVATARS = [
+    '🦊', '🐼', '🐨', '🦁', '🐯', '🐸', '🐵', '🦉', '🐺', '🐻',
+    '🦄', '🐙', '🐳', '🦋', '🌻', '🚀', '⚡', '🔥', '🌙', '⭐',
+    '🎮', '🎨', '🎯', '💎', '👑', '🌸', '🍀', '🌈', '☀️', '❄️'
+];
+
+const MOODS = [
+    { emoji: '😊', label: 'xursand' },
+    { emoji: '🚀', label: 'ilhomlangan' },
+    { emoji: '☕', label: 'dam olayotgan' },
+    { emoji: '💪', label: 'kuchli' },
+    { emoji: '🌙', label: 'xayolparast' },
+    { emoji: '🎯', label: 'maqsadli' },
+    { emoji: '😴', label: 'charchagan' },
+    { emoji: '🎉', label: 'bayramona' },
+    { emoji: '❤️', label: 'sevib qolgan' },
+    { emoji: '🤔', label: 'o\'ylanayotgan' },
+    { emoji: '😎', label: 'zo\'r' },
+    { emoji: '🥳', label: 'xursandchilik' }
+];
+
+const EMOJI_LIST = [
+    '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇',
+    '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚',
+    '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🥳',
+    '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖',
+    '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯',
+    '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔',
+    '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄', '😯', '😦',
+    '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐', '🥴',
+    '🤢', '🤮', '🤧', '😷', '🤒', '🤕', '🤑', '🤠', '😈', '👿',
+    '🤡', '💩', '👻', '💀', '☠️', '👽', '🤖', '🎃', '👍', '👎',
+    '👌', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '👇',
+    '☝️', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝',
+    '🙏', '💪', '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍',
+    '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '🔥',
+    '⭐', '🌟', '✨', '⚡', '💫', '💥', '💢', '💤', '💦', '💨'
+];
+
+/* AI Bots — har biri o'z mutaxassisligi bilan */
+const AI_BOTS = [
+    {
+        id: 1, name: 'Koder AI', icon: '💻',
+        desc: 'Dasturlash yordamchisi',
+        topics: ['kod', 'python', 'javascript', 'dasturlash', 'html', 'css', 'bug', 'react', 'vue', 'node', 'sql', 'git', 'api', 'frontend', 'backend', 'function'],
+        replies: [
+            'Dasturlashda eng muhim narsa — amaliyot. Har kuni kamida 1 soat kod yozing.',
+            'Kod yozishdan oldin algoritmni qog\'ozga chizing — bu xatolarni 50% kamaytiradi.',
+            'Git — bu dasturchining eng yaxshi do\'sti. Har bir o\'zgarishni commit qiling.',
+            'Clean code yozing: o\'zgaruvchi nomlarini mazmunli qo\'ying.',
+            'Debug qilishda console.log eng yaxshi yordamchingiz.',
+            'Framework o\'rganishdan oldin HTML/CSS/JS ni chuqur o\'rganing.'
+        ]
+    },
+    {
+        id: 2, name: 'Dizayner AI', icon: '🎨',
+        desc: 'UI/UX dizayner',
+        topics: ['dizayn', 'ui', 'ux', 'foto', 'rang', 'shrift', 'logo', 'figma', 'typography', 'layout', 'color', 'gradient'],
+        replies: [
+            'Yaxshi dizayn — bu kamroq elementlar bilan ko\'proq narsa aytish san\'ati.',
+            'Rang palitrasi 3 tadan oshmasin: asosiy, ikkilamchi, aksent.',
+            'Foydalanuvchi tajribasi (UX) — bu dizaynning 80%.',
+            'Whitespace — bu bo\'sh joy emas, bu nafas.',
+            'Shrift o\'lchamlarida 1.5x scale ishlatib ko\'ring (16-24-36-54).',
+            'Kontrast muhim: matn va fon orasida kamida 4.5:1 nisbat bo\'lsin.'
+        ]
+    },
+    {
+        id: 3, name: 'Marketolog AI', icon: '📈',
+        desc: 'Marketing mutaxassisi',
+        topics: ['marketing', 'smm', 'reklama', 'brend', 'sotuv', 'mijoz', 'kontent', 'instagram', 'facebook', 'targeting', 'funnel'],
+        replies: [
+            'Marketing — bu mahsulotingizni sevadigan odamlarni topish.',
+            'SMM da izchillik muhim: haftada 3-5 post optimal.',
+            'Mijozni tinglang — u sizga eng yaxshi g\'oyalarni beradi.',
+            'Kontent marketing — bu pul emas, vaqt investitsiyasi.',
+            'A/B test qilishdan qo\'rqmang: eng yaxshi variant faqat sinovda topiladi.',
+            'Email marketing hanuz eng samarali kanallardan biri.'
+        ]
+    },
+    {
+        id: 4, name: 'Tarjimon AI', icon: '🌐',
+        desc: 'Tillar tarjimoni',
+        topics: ['tarjima', 'ingliz', 'rus', 'tarjimon', 'til', 'english', 'translate', 'language'],
+        replies: [
+            'Tarjima — bu so\'z almashtirish emas, ma\'no ko\'chirish.',
+            'Ingliz tilini o\'rganish uchun har kuni 20 yangi so\'z yodlang.',
+            'Filmlarni asl tilida ko\'ring — eng yaxshi o\'qituvchi.',
+            'Til o\'rganishda asosiy to\'siq — qo\'rquv. Xato qilishdan qo\'rqmang.',
+            'Grammatikani o\'rganing, lekin avval gapirishni boshlang.',
+            'Til — bu kunlik mashq, bir martalik harakat emas.'
+        ]
+    },
+    {
+        id: 5, name: 'Shifokor AI', icon: '🩺',
+        desc: 'Tibbiy maslahat',
+        topics: ['shifokor', 'sog\'liq', 'kasal', 'dori', 'tibbiyot', 'og\'riq', 'bosh', 'tish', 'yurak', 'qon'],
+        replies: [
+            'Har qanday kasallikda birinchi qadam — haqiqiy shifokorga murojaat.',
+            'Kuniga 2 litr suv ichish — eng oddiy va samarali odat.',
+            'Kuniga 7-8 soat uxlash immunitet uchun zarur.',
+            'Sport — bu eng yaxshi dori.',
+            'Stressni kamaytirish uchun meditatsiya yoki chuqur nafas olishni sinab ko\'ring.',
+            'Yillik tibbiy ko\'rikdan o\'tishni unutmang.'
+        ]
+    },
+    {
+        id: 6, name: 'Oshpaz AI', icon: '👨‍🍳',
+        desc: 'Retsept va oshxona',
+        topics: ['ovqat', 'retsept', 'pishirish', 'taom', 'sho\'rva', 'salat', 'non', 'palov', 'kabob', 'somsa'],
+        replies: [
+            'Oshxona — bu sevgi bilan qilingan san\'at.',
+            'Palovning siri — guruchni to\'g\'ri tanlashda.',
+            'Somsa uchun xamir yupqa bo\'lsin, ichi esa suvli.',
+            'Taomga tuz oxirida qo\'shing — aks holda qattiq bo\'ladi.',
+            'Yangi masalliqlar — mazali taomning kaliti.',
+            'Retseptni o\'zgartirishdan qo\'rqmang — bu ijodkorlik.'
+        ]
+    },
+    {
+        id: 7, name: 'Psixolog AI', icon: '🧠',
+        desc: 'Ruhiy yordamchi',
+        topics: ['psixolog', 'ruhiy', 'stress', 'xafa', 'yolg\'iz', 'qo\'rquv', 'tushkun', 'depressiya', 'tashvish', 'xotirjam'],
+        replies: [
+            'Sizning his-tuyg\'ularingiz haqiqiy va muhim. Ularni inkor etmang.',
+            'Qiyin paytlarda o\'zingizga mehribon bo\'ling.',
+            'Har kuni 3 ta yaxshi narsa yozing — bu kayfiyatni yaxshilaydi.',
+            'Yolg\'izlik hissi — bu siz yomonligingiz belgisi emas.',
+            'Professional psixologga murojaat qilish — kuchlilik belgisi.',
+            'Nafas oling. Bu ham o\'tadi.'
+        ]
+    },
+    {
+        id: 8, name: 'Biznes AI', icon: '💼',
+        desc: 'Startap maslahatchi',
+        topics: ['biznes', 'startap', 'investor', 'kompaniya', 'loyiha', 'foyda', 'strategiya', 'moliya', 'kapital', 'mahsulot'],
+        replies: [
+            'Startap — bu 100 marta sinab, 1 marta muvaffaqiyat qozonish.',
+            'Mahsulotni emas, muammoni yeching.',
+            'Investor pul berishdan oldin jamoaga qaraydi.',
+            'MVP (minimal viable product) — eng tez bozorga chiqing.',
+            'Har bir xarajatni hisobga oling — pul tez tugaydi.',
+            'Hamkor topish — yakka ishlashdan samarali.'
+        ]
+    },
+    {
+        id: 9, name: 'Huquqshunos AI', icon: '⚖️',
+        desc: 'Yuridik maslahat',
+        topics: ['qonun', 'huquq', 'sud', 'shartnoma', 'advokat', 'yuridik', 'jinoyat', 'mulk', 'meros'],
+        replies: [
+            'Har qanday muhim shartnomani advokat bilan tekshiring.',
+            'Huquqlaringizni bilish — himoyaning birinchi qadami.',
+            'Og\'zaki kelishuvlar sudda isbotlanmaydi — yozma shartnoma tuzing.',
+            'Soliq to\'lashdan qochmang — jarima kattaroq bo\'ladi.',
+            'Meros masalasida notarial tasdiqlangan vasiyatnoma eng ishonchli.',
+            'Yuridik yordam uchun bepul davlat xizmatlari mavjud.'
+        ]
+    },
+    {
+        id: 10, name: 'Sayohat AI', icon: '✈️',
+        desc: 'Sayohat rejasi',
+        topics: ['sayohat', 'dengiz', 'tog\'', 'poyezd', 'samolyot', 'mehmonxona', 'vizit', 'turizm', 'davlat', 'chegara'],
+        replies: [
+            'Sayohatdan oldin byudjetni 2 barobar zaxira bilan rejalashtiring.',
+            'Mahalliy taomlarni tatib ko\'ring — eng yaxshi xotiralar shu yerda.',
+            'Chiptalarni oldindan band qiling — 2-3x arzonroq.',
+            'Eng yaxshi sayohat — rejadan chetga chiqish.',
+            'Mahalliy transportdan foydalaning — pul va vaqtni tejaydi.',
+            'Pasport va viza muddatini oldindan tekshiring.'
+        ]
+    },
+    {
+        id: 11, name: 'Musiqa AI', icon: '🎵',
+        desc: 'Musiqa yordamchi',
+        topics: ['musiqa', 'qo\'shiq', 'garmoniya', 'nota', 'kuy', 'gitara', 'pianino', 'baraban'],
+        replies: [
+            'Musiqa — bu ruhning tili.',
+            'Har kuni 15 daqiqa mashq — bir yilda professional darajaga chiqaradi.',
+            'Notalarni o\'rganish — musiqa nazariyasining asosi.',
+            'O\'z uslubingizni topish uchun turli janrlarni tinglang.',
+            'Metronom bilan mashq qiling — ritm muhim.',
+            'Ijodkorlik uchun kayfiyatni o\'zgartiring.'
+        ]
+    },
+    {
+        id: 12, name: 'Matematik AI', icon: '➗',
+        desc: 'Matematika yordamchi',
+        topics: ['matematika', 'hisob', 'algebra', 'geometriya', 'formula', 'tenglama', 'integral', 'hosila', 'statistika'],
+        replies: [
+            'Matematika — bu naqshlarni topish san\'ati.',
+            'Formulani yodlamang, mantiqini tushuning.',
+            'Har kuni 1 masala yechish — eng yaxshi mashq.',
+            'Xato qilishdan qo\'rqmang — bu o\'rganishning bir qismi.',
+            'Algebra — bu noma\'lum sonlarni topish o\'yini.',
+            'Geometriyada chizma chizish — yarmi yechim.'
+        ]
+    },
+    {
+        id: 13, name: 'Tarixchi AI', icon: '📜',
+        desc: 'Tarixiy faktlar',
+        topics: ['tarix', 'o\'tmish', 'qadim', 'ajdodlar', 'imperiya', 'urush', 'saltanat', 'buyuk', 'sarkarda'],
+        replies: [
+            'Tarixni bilmagan xalq kelajagini qura olmaydi.',
+            'Amir Temur — buyuk sarkarda va davlat arbobi.',
+            'Al-Xorazmiy — algebra asoschisi, jahon ilmiga ulkan hissa qo\'shgan.',
+            'Bobur — Boburiylar sulolasi asoschisi.',
+            'Ulug\'bek — astronomiya sohasida buyuk olim.',
+            'Navoiy — o\'zbek adabiyotining yorqin yulduzi.'
+        ]
+    },
+    {
+        id: 14, name: 'Sport AI', icon: '⚽',
+        desc: 'Sport yangiliklari',
+        topics: ['sport', 'futbol', 'boks', 'kurash', 'olimpiya', 'musobaqa', 'tennis', 'basketbol', 'yugurish'],
+        replies: [
+            'Sport — bu salomatlik garovi.',
+            'Futbol — dunyodagi eng ommabop sport turi.',
+            'Har kuni 30 daqiqa yugurish — sog\'liq uchun eng yaxshi investitsiya.',
+            'Kurash — o\'zbek xalqining faxri.',
+            'Chempionlar mashqdan charchamaydi, ular mashqsiz charchaydi.',
+            'Sport intizom o\'rgatadi.'
+        ]
+    },
+    {
+        id: 15, name: 'Kino AI', icon: '🎬',
+        desc: 'Kino tavsiyalari',
+        topics: ['kino', 'film', 'serial', 'aktyor', 'rejissyor', 'tomosha', 'drama', 'komediya', 'triller'],
+        replies: [
+            'Eng yaxshi filmlar — bu his-tuyg\'ularni uyg\'otadigan filmlar.',
+            'Kino — bu 2 soat ichida boshqa hayotni yashash.',
+            'Serial tomosha qilish vaqtni boshqarishni o\'rgatadi.',
+            'Oskar olgan filmlar — sifat belgisi.',
+            'Mahalliy kinolar ham jahon darajasida bo\'lishi mumkin.',
+            'Kino — bu san\'at, ilm va hissiyot uyg\'unligi.'
+        ]
+    },
+    {
+        id: 16, name: 'Fitnes AI', icon: '💪',
+        desc: 'Mashqlar va sog\'lom turmush',
+        topics: ['fitnes', 'mashq', 'gym', 'yugurish', 'muskul', 'vazn', 'ovqatlanish', 'kardio', 'shtanga'],
+        replies: [
+            'Fitnes — bu bir martalik harakat emas, hayot tarzi.',
+            'Mashqdan oldin isinish — jarohatdan himoya.',
+            'Kuniga 8 stakan suv iching.',
+            'Protein mushak o\'sishi uchun zarur.',
+            'Kardio va kuch mashqlarini birlashtiring.',
+            'Dam olish ham mashqning bir qismi.'
+        ]
+    },
+    {
+        id: 17, name: 'Avto AI', icon: '🚗',
+        desc: 'Mashina tanlash',
+        topics: ['mashina', 'avto', 'dvigatel', 'yuritish', 'avtomobil', 'haydash', 'yoqilg\'i', 'remont'],
+        replies: [
+            'Mashina tanlashda ishonchlilik birinchi o\'rinda.',
+            'Muntazam texnik ko\'rik — uzoq umr garovi.',
+            'Yoqilg\'i tejamkorligi muhim omil.',
+            'Xavfsizlik — hech qachon murosaga kelmang.',
+            'Elektr mashinalar kelajak.',
+            'Mashina — bu vositа, hashamat emas.'
+        ]
+    },
+    {
+        id: 18, name: 'Bog\'bon AI', icon: '🌱',
+        desc: 'O\'simliklar parvarishi',
+        topics: ['o\'simlik', 'gul', 'bog\'', 'daraxt', 'parvarish', 'sug\'orish', 'urug\'', 'tuproq'],
+        replies: [
+            'O\'simliklar — bu sabr va g\'amxo\'rlik ramzi.',
+            'Sug\'orish vaqti — ertalab yoki kechqurun.',
+            'Har bir o\'simlikning o\'z yorug\'lik ehtiyoji bor.',
+            'Tuproqni to\'g\'ri tanlash muvaffaqiyat kaliti.',
+            'Qishda o\'simliklarni kamroq sug\'oring.',
+            'Yangi boshlovchilar uchun kaktus yoki aloe ideal.'
+        ]
+    },
+    {
+        id: 19, name: 'Astrolog AI', icon: '🔮',
+        desc: 'Yulduzlar bashorati',
+        topics: ['astrologiya', 'yulduz', 'burj', 'bashorat', 'fal', 'ekzotik', 'zodiak'],
+        replies: [
+            'Yulduzlar — bu yo\'l ko\'rsatuvchi, taqdiringizni belgilovchi emas.',
+            'Har bir burjning o\'z kuchli tomonlari bor.',
+            'Astrologiya — bu o\'z-o\'zini bilish vositasi.',
+            'Bugun — yangi boshlanishlar uchun yaxshi kun.',
+            'Sizning energiyangiz atrofingizga ta\'sir qiladi.',
+            'Ishoning, lekin harakat ham qiling.'
+        ]
+    },
+    {
+        id: 20, name: 'Komediyachi AI', icon: '😂',
+        desc: 'Hazillar',
+        topics: ['hazil', 'kulgi', 'latifa', 'anim', 'qiziq', 'komediya', 'masxara'],
+        replies: [
+            'Nega dasturchi ko\'zoynak taqadi? Chunki u C# ni ko\'ra olmaydi! 😂',
+            'Nega kompyuter sovuq? Chunki u Windows ochgan! 🥶',
+            'Nega matematik kitobni yozgan? Chunki u muammolarni yechishni yaxshi ko\'radi! 📚',
+            'Hayot — bu teatr, siz esa aktyorsiz. Kulishni unutmang!',
+            'Kulgi — eng yaxshi dori. Bepul va nojoiz ta\'sir qilmaydi! 😄',
+            'Kulgi bilan boshlangan kun — yaxshi kun!'
+        ]
+    }
+];
+
+/* ============================================================================
+   SECTION 4: LEADERBOARD DATA
+   ============================================================================ */
+
+const LEADERBOARDS = [
+    {
+        id: 'subscribers',
+        title: 'Eng ko\'p obunachilar',
+        icon: '👥',
+        data: [
+            { name: 'Dilnoza Karimova', value: '2.4M obunachi', avatar: '🌻', verified: true },
+            { name: 'Javlon Toshmatov', value: '1.8M obunachi', avatar: '🚀', verified: true },
+            { name: 'Malika Yusupova', value: '1.5M obunachi', avatar: '🦋', verified: false },
+            { name: 'Bekzod Rahimov', value: '1.2M obunachi', avatar: '🐺', verified: true },
+            { name: 'Aziz Sobirov', value: '980K obunachi', avatar: '⚡', verified: true }
+        ]
+    },
+    {
+        id: 'sold_subs',
+        title: 'Eng ko\'p obuna sotganlar',
+        icon: '💳',
+        data: [
+            { name: 'Uzum Market', value: '890K obuna', avatar: '🛒', verified: true },
+            { name: 'Payme', value: '750K obuna', avatar: '💰', verified: true },
+            { name: 'Click', value: '620K obuna', avatar: '👆', verified: true },
+            { name: 'Sardor A.', value: '450K obuna', avatar: '⭐', verified: false },
+            { name: 'Investor Uz', value: '390K obuna', avatar: '📈', verified: true }
+        ]
+    },
+    {
+        id: 'shares',
+        title: 'Eng ko\'p aksiyalarga ega',
+        icon: '📊',
+        data: [
+            { name: 'Trade Pro Uz', value: '4,240 aksiya', avatar: '💎', verified: true },
+            { name: 'Crypto King', value: '3,890 aksiya', avatar: '👑', verified: true },
+            { name: 'Investment Group', value: '2,760 aksiya', avatar: '🏦', verified: true },
+            { name: 'Aziz Investor', value: '1,450 aksiya', avatar: '💵', verified: false },
+            { name: 'Bekzod B.', value: '920 aksiya', avatar: '💰', verified: false }
+        ]
+    },
+    {
+        id: 'biological',
+        title: 'Biologik yaqin odamlar',
+        icon: '🧬',
+        data: [
+            { name: 'Karimovlar oilasi', value: '12 a\'zo', avatar: '👨‍👩‍👧‍👦', verified: false },
+            { name: 'Toshmatovlar', value: '9 a\'zo', avatar: '👨‍👩‍👧', verified: false },
+            { name: 'Aliyevlar', value: '7 a\'zo', avatar: '👨‍👩‍👦', verified: false },
+            { name: 'Yusupovlar', value: '6 a\'zo', avatar: '👩‍👩‍👧', verified: false },
+            { name: 'Ismoilovlar', value: '5 a\'zo', avatar: '👨‍👦', verified: false }
+        ]
+    },
+    {
+        id: 'coins',
+        title: 'Eng ko\'p tangalar (Wallet)',
+        icon: '🪙',
+        data: [
+            { name: 'CryptoWhale', value: '1,240,000 UGC', avatar: '🐋', verified: true },
+            { name: 'UzCoinMaster', value: '890,000 UGC', avatar: '🎩', verified: true },
+            { name: 'BlockchainBek', value: '670,000 UGC', avatar: '⛓️', verified: true },
+            { name: 'Meta Trader', value: '450,000 UGC', avatar: '📊', verified: false },
+            { name: 'TokenHunter', value: '320,000 UGC', avatar: '🎯', verified: false }
+        ]
+    },
+    {
+        id: 'brands',
+        title: 'Eng kuchli brendlar',
+        icon: '🏢',
+        data: [
+            { name: 'Uzum', value: '9.8/10 ball', avatar: '🛍️', verified: true },
+            { name: 'Payme', value: '9.5/10 ball', avatar: '💳', verified: true },
+            { name: 'Unigram', value: '9.3/10 ball', avatar: '📸', verified: true },
+            { name: 'Beeline', value: '8.9/10 ball', avatar: '📡', verified: true },
+            { name: 'UzAuto', value: '8.7/10 ball', avatar: '🚗', verified: true }
+        ]
+    },
+    {
+        id: 'ecommerce',
+        title: 'E-commerce sotuvchilar',
+        icon: '🛒',
+        data: [
+            { name: 'TexnoPlus', value: '45,000 sotuv', avatar: '💻', verified: true },
+            { name: 'BozorBek', value: '38,000 sotuv', avatar: '🛍️', verified: true },
+            { name: 'Sotuvchi_01', value: '32,000 sotuv', avatar: '📦', verified: false },
+            { name: 'MegaShop', value: '28,000 sotuv', avatar: '🏬', verified: true },
+            { name: 'KiyimStyle', value: '22,000 sotuv', avatar: '👗', verified: false }
+        ]
+    },
+    {
+        id: 'women',
+        title: 'Eng mashhur ayollar',
+        icon: '👩',
+        data: [
+            { name: 'Sevinch Aliyeva', value: '2.1M obunachi', avatar: '🌙', verified: true },
+            { name: 'Nodira Ismoilova', value: '1.7M obunachi', avatar: '🌻', verified: true },
+            { name: 'Shahnoza Karimova', value: '1.3M obunachi', avatar: '🦋', verified: true },
+            { name: 'Malika Yusupova', value: '980K obunachi', avatar: '🎨', verified: false },
+            { name: 'Dilnoza K.', value: '850K obunachi', avatar: '💎', verified: true }
+        ]
+    },
+    {
+        id: 'men',
+        title: 'Eng mashhur erkaklar',
+        icon: '👨',
+        data: [
+            { name: 'Javlon Toshmatov', value: '1.8M obunachi', avatar: '🚀', verified: true },
+            { name: 'Aziz Sobirov', value: '1.4M obunachi', avatar: '⚡', verified: true },
+            { name: 'Bekzod Rahimov', value: '1.2M obunachi', avatar: '🐺', verified: true },
+            { name: 'Sardor Aliyev', value: '890K obunachi', avatar: '🎯', verified: false },
+            { name: 'Kamol Nazarov', value: '620K obunachi', avatar: '🔥', verified: false }
+        ]
+    },
+    {
+        id: 'history',
+        title: 'Tarixdagi mashhur odamlar',
+        icon: '🏛️',
+        data: [
+            { name: 'Amir Temur', value: 'Buyuk sarkarda', avatar: '⚔️', verified: true },
+            { name: 'Al-Xorazmiy', value: 'Algebra asoschisi', avatar: '📐', verified: true },
+            { name: 'Bobur', value: 'Boburiylar asoschisi', avatar: '👑', verified: true },
+            { name: 'Ulug\'bek', value: 'Astronomiya olimi', avatar: '🔭', verified: true },
+            { name: 'Navoiy', value: 'Buyuk shoir', avatar: '📜', verified: true }
+        ]
+    },
+    {
+        id: 'university',
+        title: 'Bir xil universitet',
+        icon: '🎓',
+        data: [
+            { name: 'TATU', value: '12,400 a\'zo', avatar: '💻', verified: true },
+            { name: 'O\'zMU', value: '10,800 a\'zo', avatar: '📚', verified: true },
+            { name: 'Webster Uni', value: '6,500 a\'zo', avatar: '🌐', verified: true },
+            { name: 'ToshDTU', value: '8,200 a\'zo', avatar: '🏛️', verified: false },
+            { name: 'TTPU', value: '5,400 a\'zo', avatar: '🔬', verified: false }
+        ]
+    },
+    {
+        id: 'school',
+        title: 'Bir xil maktab',
+        icon: '🏫',
+        data: [
+            { name: 'Prezident maktabi', value: '4,200 a\'zo', avatar: '⭐', verified: true },
+            { name: '1-maktab', value: '3,800 a\'zo', avatar: '📖', verified: false },
+            { name: 'IDUM', value: '3,100 a\'zo', avatar: '🎯', verified: true },
+            { name: '56-maktab', value: '2,400 a\'zo', avatar: '🏫', verified: false },
+            { name: 'Al-Xorazmiy maktabi', value: '1,900 a\'zo', avatar: '🔢', verified: false }
+        ]
+    },
+    {
+        id: 'kindergarten',
+        title: 'Bir xil bog\'cha',
+        icon: '🧸',
+        data: [
+            { name: 'Quyoshcha', value: '890 a\'zo', avatar: '☀️', verified: false },
+            { name: 'Bola Bukcha', value: '720 a\'zo', avatar: '🌈', verified: false },
+            { name: 'Ziyo', value: '640 a\'zo', avatar: '🌟', verified: false },
+            { name: 'Guliston', value: '510 a\'zo', avatar: '🌷', verified: false },
+            { name: 'Bilimdon', value: '420 a\'zo', avatar: '📚', verified: false }
+        ]
+    }
+];
+
+/* ============================================================================
+   SECTION 5: GAMES DATA
+   ============================================================================ */
+
+const GAMES = [
+    {
+        id: 'clicker',
+        name: 'Clicker',
+        icon: '🪙',
+        desc: '15 sekundda ko\'p bosing',
+        reward: 20
+    },
+    {
+        id: 'reaction',
+        name: 'Reaksiya',
+        icon: '⚡',
+        desc: 'Yashil bo\'lganda bosing',
+        reward: 15
+    },
+    {
+        id: 'memory',
+        name: 'Xotira',
+        icon: '🧠',
+        desc: 'Juftliklarni toping',
+        reward: 25
+    },
+    {
+        id: 'guess',
+        name: 'Raqam topish',
+        icon: '🔢',
+        desc: '1-100 orasida topish',
+        reward: 20
+    },
+    {
+        id: 'math',
+        name: 'Matematika',
+        icon: '➗',
+        desc: 'Tez hisoblang',
+        reward: 20
+    },
+    {
+        id: 'color',
+        name: 'Rang topish',
+        icon: '🎨',
+        desc: 'Farqli rangni toping',
+        reward: 15
+    },
+    {
+        id: 'word',
+        name: 'So\'z topish',
+        icon: '🔤',
+        desc: 'Harflarni toping',
+        reward: 25
+    },
+    {
+        id: 'sequence',
+        name: 'Ketma-ketlik',
+        icon: '🔗',
+        desc: 'Davom ettiring',
+        reward: 20
+    },
+    {
+        id: 'typing',
+        name: 'Tez yozish',
+        icon: '⌨️',
+        desc: 'Matnni tez yozing',
+        reward: 20
+    },
+    {
+        id: 'quiz',
+        name: 'Kviz',
+        icon: '❓',
+        desc: 'Savollarga javob bering',
+        reward: 25
+    }
+];
+
+/* ============================================================================
+   SECTION 6: STATE
+   ============================================================================ */
+
+const state = {
+    user: null,
+    view: 'feed',
+    theme: 'dark',
+
+    // feed
+    feedTab: 'all',
+    composerText: '',
+    composerMood: null,
+
+    // trend
+    trendRange: 'week',
+
+    // crypto
+    cryptoFilter: 'all',
+
+    // e-commerce
+    cart: [],
+
+    // AI
+    activeBot: null,
+    aiHistory: {},
+
+    // games
+    activeGame: null,
+    gameState: null,
+    gameTimer: null,
+
+    // leaderboard
+    leaderboardFilter: 'all',
+
+    // profile
+    profileTab: 'posts',
+
+    // search
+    searchQuery: '',
+
+    // auth
+    authMode: 'login',
+
+    // init
+    initialized: false
+};
+
+/* ============================================================================
+   SECTION 7: DATA SEEDING
+   ============================================================================ */
+
+function seedData() {
+    // Posts
+    if (!LS.get('posts')) {
+        const posts = [
+            {
+                id: uid(),
+                userId: 'u1',
+                authorName: 'Dilnoza Karimova',
+                avatar: '🌻',
+                verified: true,
+                text: 'Unigram — kelajak tarmog\'i! 🚀\n\nYangi imkoniyatlar bilan tanishing: AI yordamchilar, kripto birja, o\'yinlar va yana ko\'p narsalar!',
+                video: true,
+                image: null,
+                likes: 1240,
+                comments: 45,
+                saves: 23,
+                liked: false,
+                saved: false,
+                at: now() - 7200000,
+                tags: ['unigram', 'yangilik', 'kelajak']
+            },
+            {
+                id: uid(),
+                userId: 'u2',
+                authorName: 'Javlon Toshmatov',
+                avatar: '🚀',
+                verified: true,
+                text: 'Kripto bozori yangiliklari: BTC yangi cho\'qqilarda! 📈\n\nUnigram\'da endi jonli narxlarni kuzatish mumkin.',
+                video: false,
+                image: null,
+                likes: 890,
+                comments: 120,
+                saves: 67,
+                liked: false,
+                saved: false,
+                at: now() - 18000000,
+                tags: ['kripto', 'btc', 'bitcoin']
+            },
+            {
+                id: uid(),
+                userId: 'u3',
+                authorName: 'Bekzod Rahimov',
+                avatar: '🐺',
+                verified: true,
+                text: 'E-commerce bo\'yicha maslahat:\n\n✅ Mijozlarga ishonch — eng muhim narsa\n✅ Tez yetkazib berish\n✅ Sifatli rasm va tavsif\n\nUnigram Market\'da barchasi bor!',
+                video: false,
+                image: null,
+                likes: 2300,
+                comments: 340,
+                saves: 180,
+                liked: false,
+                saved: false,
+                at: now() - 36000000,
+                tags: ['ecommerce', 'biznes', 'market']
+            },
+            {
+                id: uid(),
+                userId: 'u4',
+                authorName: 'Aziz Sobirov',
+                avatar: '⚡',
+                verified: true,
+                text: 'React 19 yangi imkoniyatlari haqida qisqa video 🎬\n\nServer Components, Actions va boshqalar.',
+                video: true,
+                image: null,
+                likes: 1560,
+                comments: 89,
+                saves: 210,
+                liked: false,
+                saved: false,
+                at: now() - 54000000,
+                tags: ['dasturlash', 'react', 'javascript']
+            },
+            {
+                id: uid(),
+                userId: 'u5',
+                authorName: 'Sevinch Aliyeva',
+                avatar: '🌙',
+                verified: false,
+                text: 'Bugun 20 xil AI yordamchi bilan suhbatlashdim. Eng zo\'ri — Koder AI! 💻\n\nSiz qaysi birini yoqtirdingiz?',
+                video: false,
+                image: null,
+                likes: 670,
+                comments: 78,
+                saves: 34,
+                liked: false,
+                saved: false,
+                at: now() - 72000000,
+                tags: ['ai', 'texnologiya']
+            }
+        ];
+        LS.set('posts', posts);
+    }
+
+    // Crypto coins
+    if (!LS.get('crypto')) {
+        const crypto = [
+            { symbol: 'BTC', name: 'Bitcoin', price: 64230.50, change24: 2.42, holdings: 0 },
+            { symbol: 'ETH', name: 'Ethereum', price: 3450.20, change24: -1.18, holdings: 0 },
+            { symbol: 'SOL', name: 'Solana', price: 145.80, change24: 5.67, holdings: 0 },
+            { symbol: 'UGC', name: 'Unigram Coin', price: 1.25, change24: 15.34, holdings: 0 },
+            { symbol: 'ADA', name: 'Cardano', price: 0.45, change24: -0.52, holdings: 0 }
+        ];
+        LS.set('crypto', crypto);
+    }
+
+    // Products
+    if (!LS.get('products')) {
+        const products = [
+            { id: 'p1', name: 'iPhone 15 Pro', price: 999, emoji: '📱', desc: 'Titanium, 256GB, A17 Pro', seller: 'TexnoPlus', rating: 4.9 },
+            { id: 'p2', name: 'MacBook Pro M3', price: 1999, emoji: '💻', desc: '14", 16GB RAM, 512GB SSD', seller: 'MegaShop', rating: 4.8 },
+            { id: 'p3', name: 'AirPods Max', price: 549, emoji: '🎧', desc: 'Space Gray, ANC', seller: 'AudioPro', rating: 4.7 },
+            { id: 'p4', name: 'iPad Air', price: 799, emoji: '📲', desc: 'M2, 11", 128GB', seller: 'Apple Store', rating: 4.9 },
+            { id: 'p5', name: 'Sony PS5', price: 499, emoji: '🎮', desc: 'Disc Edition, 1TB', seller: 'GameZone', rating: 4.8 },
+            { id: 'p6', name: 'Apple Watch 9', price: 399, emoji: '⌚', desc: '45mm, GPS + Cellular', seller: 'GadgetUz', rating: 4.6 },
+            { id: 'p7', name: 'Samsung S24', price: 899, emoji: '📱', desc: 'Ultra, 512GB, AI Camera', seller: 'SamsungUz', rating: 4.8 },
+            { id: 'p8', name: 'DJI Mavic 3', price: 1599, emoji: '🚁', desc: '4K, 46 min flight', seller: 'DroneUz', rating: 4.9 }
+        ];
+        LS.set('products', products);
+    }
+
+    // Streams
+    if (!LS.get('streams')) {
+        const streams = [
+            { id: 's1', name: 'Kripto tahlil Live', streamer: 'CryptoUz', viewers: 12400, emoji: '📈' },
+            { id: 's2', name: 'Dasturlash darsi — React', streamer: 'DevBek', viewers: 5200, emoji: '💻' },
+            { id: 's3', name: 'Dizayn master-klass', streamer: 'DilnozaK', viewers: 8100, emoji: '🎨' },
+            { id: 's4', name: 'E-commerce strategiya', streamer: 'BekzodBiz', viewers: 3400, emoji: '🛍️' }
+        ];
+        LS.set('streams', streams);
+    }
+
+    // Stories
+    if (!LS.get('stories')) {
+        const stories = [
+            { id: 'st1', userId: 'u1', author: 'Dilnoza K.', avatar: '🌻', emoji: '🌅', text: 'Ertalabki Toshkent', seen: false },
+            { id: 'st2', userId: 'u2', author: 'Javlon T.', avatar: '🚀', emoji: '💻', text: 'Yangi loyiha', seen: false },
+            { id: 'st3', userId: 'u3', author: 'Bekzod R.', avatar: '🐺', emoji: '📚', text: 'Bugungi kitob', seen: true },
+            { id: 'st4', userId: 'u4', author: 'Aziz S.', avatar: '⚡', emoji: '🎯', text: 'Maqsadlar', seen: false }
+        ];
+        LS.set('stories', stories);
+    }
+}
+
+/* ============================================================================
+   SECTION 8: INITIALIZATION
+   ============================================================================ */
+
+function init() {
+    // Load state
+    state.theme = LS.get('theme', 'dark');
+    state.user = LS.get('user', null);
+    state.cart = LS.get('cart', []);
+    state.aiHistory = LS.get('ai_history', {});
+
+    // Apply theme
+    applyTheme(state.theme);
+
+    // Seed data
+    seedData();
+
+    // Render
+    render();
+
+    // Start live crypto updates
+    setInterval(updateCryptoPrices, 5000);
+
+    state.initialized = true;
+
+    console.log('%c📸 Unigram v4.0 — ishga tushdi', 'color:#00F0FF;font-size:16px;font-weight:900');
+}
+
+function applyTheme(theme) {
+    state.theme = theme;
+    document.documentElement.setAttribute('data-theme', theme);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', theme === 'dark' ? '#0a0e1a' : '#f8fafc');
+    LS.set('theme', theme);
+}
+
+/* ============================================================================
+   SECTION 9: MAIN RENDER
+   ============================================================================ */
+
+function render() {
+    const app = $('#app');
+    if (!app) return;
+
+    if (!state.user) {
+        app.innerHTML = renderAuthScreen();
+        attachAuthHandlers();
+        return;
+    }
+
+    app.innerHTML = `
+        <div class="app-shell">
+            ${renderSidebar()}
+            <div style="display:flex;flex-direction:column;flex:1;min-width:0">
+                ${renderMobileHeader()}
+                <main class="main-panel">
+                    ${renderView()}
+                </main>
+            </div>
+        </div>
+        ${renderMobileNav()}
+    `;
+
+    if (state.view === 'ai-chat') {
+        setTimeout(scrollChatToBottom, 50);
+    }
+}
+
+function renderMobileHeader() {
+    return `
+        <header class="mobile-header">
+            <div style="display:flex;align-items:center;gap:8px">
+                <div class="brand-mark" style="width:32px;height:32px">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                    </svg>
+                </div>
+                <span style="font-size:16px;font-weight:900">Unigram</span>
+            </div>
+            <div class="user-avatar-sm" onclick="navigate('profile')" style="cursor:pointer">
+                ${esc(state.user.avatar)}
+            </div>
+        </header>
+    `;
+}
+
+function renderView() {
+    switch (state.view) {
+        case 'feed': return renderFeedView();
+        case 'trend': return renderTrendView();
+        case 'crypto': return renderCryptoView();
+        case 'ecommerce': return renderEcommerceView();
+        case 'ai': return renderAIListView();
+        case 'ai-chat': return renderAIChatView();
+        case 'games': return renderGamesView();
+        case 'leaderboard': return renderLeaderboardView();
+        case 'streams': return renderStreamsView();
+        case 'subscriptions': return renderSubscriptionsView();
+        case 'profile': return renderProfileView();
+        case 'settings': return renderSettingsView();
+        case 'search': return renderSearchView();
+        default: return renderFeedView();
+    }
+}
+
+/* ============================================================================
+   SECTION 10: AUTH SCREEN
+   ============================================================================ */
+
+function renderAuthScreen() {
+    return `
+        <div class="auth-page">
+            <div class="auth-card">
+                <div class="auth-logo">
+                    <div class="auth-logo-mark">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                            <path d="M8 9v3.5a3.5 3.5 0 0 0 7 0V9"/>
+                            <circle cx="10" cy="13" r="0.75" fill="currentColor"/>
+                            <circle cx="12" cy="13" r="0.75" fill="currentColor"/>
+                            <circle cx="14" cy="13" r="0.75" fill="currentColor"/>
+                        </svg>
+                    </div>
+                </div>
+                <h1 class="auth-title">Unigram</h1>
+                <p class="auth-subtitle">Bog'lanishingiz — bir grammda</p>
+
+                <div class="auth-tabs">
+                    <button class="auth-tab ${state.authMode === 'login' ? 'active' : ''}" onclick="setAuthMode('login')">
+                        Kirish
+                    </button>
+                    <button class="auth-tab ${state.authMode === 'register' ? 'active' : ''}" onclick="setAuthMode('register')">
+                        Ro'yxatdan o'tish
+                    </button>
+                </div>
+
+                <form id="auth-form" onsubmit="handleAuthSubmit(event)">
+                    ${state.authMode === 'register' ? `
+                        <div class="form-field">
+                            <label class="form-label">Ism va familiya</label>
+                            <input type="text" class="input" id="auth-name" placeholder="Ismingiz" required minlength="2" maxlength="40">
+                        </div>
+                    ` : ''}
+
+                    <div class="form-field">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="input" id="auth-email" placeholder="email@misol.uz" required>
+                    </div>
+
+                    ${state.authMode === 'register' ? `
+                        <div class="form-field">
+                            <label class="form-label">Telefon raqam</label>
+                            <input type="tel" class="input" id="auth-phone" placeholder="+998 90 123 45 67" required>
+                        </div>
+                    ` : ''}
+
+                    <div class="form-field">
+                        <label class="form-label">Parol</label>
+                        <div class="input-wrap">
+                            <input type="password" class="input" id="auth-pass" placeholder="Kamida 6 belgi" required minlength="6" style="padding-right:44px">
+                            <button type="button" class="input-icon" onclick="togglePasswordVisibility()" id="pass-toggle">👁️</button>
+                        </div>
+                        ${state.authMode === 'register' ? `
+                            <div class="password-strength">
+                                <div class="password-strength-bar" id="pass-strength"></div>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top:8px">
+                        ${state.authMode === 'login' ? 'Kirish →' : 'Akkaunt yaratish →'}
+                    </button>
+                </form>
+
+                ${state.authMode === 'login' ? `
+                    <div class="demo-info">
+                        🧪 <b>Demo akkaunt</b><br>
+                        Email: <code>demo@unigram.uz</code><br>
+                        Parol: <code>demo123</code>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+}
+
+function attachAuthHandlers() {
+    const passInput = $('#auth-pass');
+    if (passInput && state.authMode === 'register') {
+        passInput.addEventListener('input', updatePasswordStrength);
+    }
+}
+
+function setAuthMode(mode) {
+    state.authMode = mode;
+    render();
+}
+
+function togglePasswordVisibility() {
+    const input = $('#auth-pass');
+    const btn = $('#pass-toggle');
+    if (!input || !btn) return;
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+    } else {
+        input.type = 'password';
+        btn.textContent = '👁️';
+    }
+}
+
+function updatePasswordStrength() {
+    const input = $('#auth-pass');
+    const bar = $('#pass-strength');
+    if (!input || !bar) return;
+    const val = input.value;
+    let strength = 0;
+    if (val.length >= 6) strength += 25;
+    if (val.length >= 10) strength += 20;
+    if (/[A-Z]/.test(val)) strength += 20;
+    if (/[0-9]/.test(val)) strength += 15;
+    if (/[^A-Za-z0-9]/.test(val)) strength += 20;
+    bar.style.width = Math.min(strength, 100) + '%';
+    if (strength < 40) bar.style.background = 'var(--danger)';
+    else if (strength < 70) bar.style.background = 'var(--warning)';
+    else bar.style.background = 'var(--success)';
+}
+
+function handleAuthSubmit(e) {
+    e.preventDefault();
+
+    const email = $('#auth-email').value.trim().toLowerCase();
+    const pass = $('#auth-pass').value;
+
+    if (state.authMode === 'login') {
+        // Demo user
+        if (email === 'demo@unigram.uz' && pass === 'demo123') {
+            const user = {
+                id: 'demo',
+                name: 'Demo User',
+                email: 'demo@unigram.uz',
+                phone: '+998 90 000 00 00',
+                avatar: '⭐',
+                coins: 1000,
+                level: 5,
+                verified: true,
+                plan: 'premium',
+                joined: now() - 30 * 86400000
+            };
+            state.user = user;
+            LS.set('user', user);
+            toast('Xush kelibsiz, Demo User! 🎉', 'success');
+            render();
+            return;
+        }
+
+        // Saved users
+        const users = LS.get('users', {});
+        if (users[email] && users[email].password === pass) {
+            state.user = users[email];
+            LS.set('user', state.user);
+            toast('Xush kelibsiz, ' + state.user.name + '! 🎉', 'success');
+            render();
+        } else {
+            toast('❌ Email yoki parol xato', 'error');
+        }
+        return;
+    }
+
+    // Register
+    const name = $('#auth-name').value.trim();
+    const phone = $('#auth-phone').value.trim();
+
+    if (name.length < 2) return toast('❌ Ism kamida 2 belgi', 'error');
+    if (name.length > 40) return toast('❌ Ism juda uzun', 'error');
+    if (pass.length < 6) return toast('❌ Parol kamida 6 belgi', 'error');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast('❌ Email xato', 'error');
+
+    const users = LS.get('users', {});
+    if (users[email]) return toast('❌ Bu email band', 'error');
+
+    const newUser = {
+        id: uid(),
+        name: name,
+        email: email,
+        phone: phone,
+        password: pass,
+        avatar: AVATARS[randInt(0, AVATARS.length - 1)],
+        coins: 100,
+        level: 1,
+        verified: false,
+        plan: 'free',
+        joined: now()
+    };
+
+    users[email] = newUser;
+    LS.set('users', users);
+    state.user = newUser;
+    LS.set('user', state.user);
+    toast('✅ Akkaunt yaratildi! 🎉', 'success');
+    render();
+}
+
+/* ============================================================================
+   SECTION 11: SIDEBAR & NAVIGATION
+   ============================================================================ */
+
+function renderSidebar() {
+    const navItems = [
+        { id: 'feed', icon: '🏠', label: 'Lenta' },
+        { id: 'trend', icon: '🔥', label: 'Trend Top' },
+        { id: 'crypto', icon: '📈', label: 'Kripto' },
+        { id: 'ecommerce', icon: '🛍️', label: 'Bozor' },
+        { id: 'ai', icon: '🤖', label: 'AI Markazi' },
+        { id: 'games', icon: '🎮', label: 'O\'yinlar' },
+        { id: 'leaderboard', icon: '🏆', label: 'Reyting' },
+        { id: 'streams', icon: '📺', label: 'Strimerlar' },
+        { id: 'subscriptions', icon: '💎', label: 'Obunalar' },
+        { id: 'profile', icon: '👤', label: 'Profil' },
+        { id: 'settings', icon: '⚙️', label: 'Sozlamalar' }
+    ];
+
+    return `
+        <aside class="sidebar">
+            <div class="brand-logo">
+                <div class="brand-mark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                        <path d="M8 9v3.5a3.5 3.5 0 0 0 7 0V9"/>
+                        <circle cx="10" cy="13" r="0.75" fill="currentColor"/>
+                        <circle cx="12" cy="13" r="0.75" fill="currentColor"/>
+                        <circle cx="14" cy="13" r="0.75" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="brand-name">Unigram</div>
+                    <div style="font-size:10px;color:var(--text-muted)">v4.0</div>
+                </div>
+            </div>
+
+            <nav class="nav-section">
+                ${navItems.map(item => `
+                    <button class="nav-item ${state.view === item.id ? 'active' : ''}" onclick="navigate('${item.id}')">
+                        <span class="nav-icon">${item.icon}</span>
+                        <span>${item.label}</span>
+                    </button>
+                `).join('')}
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-mini" onclick="navigate('profile')">
+                    <div class="user-avatar-sm">${esc(state.user.avatar)}</div>
+                    <div class="user-info">
+                        <div class="user-info-name">${esc(state.user.name)}</div>
+                        <div class="user-info-level">Level ${state.user.level || 1} · ${state.user.plan || 'free'}</div>
+                    </div>
+                </div>
+                <div class="balance-chip">
+                    🪙 ${fmt(state.user.coins || 0)} UGC
+                </div>
+            </div>
+        </aside>
+    `;
+}
+
+function renderMobileNav() {
+    const items = [
+        { id: 'feed', icon: '🏠', label: 'Lenta' },
+        { id: 'trend', icon: '🔥', label: 'Trend' },
+        { id: 'crypto', icon: '📈', label: 'Kripto' },
+        { id: 'games', icon: '🎮', label: 'O\'yin' },
+        { id: 'profile', icon: '👤', label: 'Profil' }
+    ];
+
+    return `
+        <nav class="mobile-nav">
+            ${items.map(item => `
+                <button class="mobile-nav-item ${state.view === item.id ? 'active' : ''}" onclick="navigate('${item.id}')">
+                    <span style="font-size:20px">${item.icon}</span>
+                    <span>${item.label}</span>
+                </button>
+            `).join('')}
+        </nav>
+    `;
+}
+
+function navigate(view) {
+    state.view = view;
+    if (view !== 'ai-chat') state.activeBot = null;
+    if (view !== 'games') {
+        state.activeGame = null;
+        state.gameState = null;
+        clearInterval(state.gameTimer);
+    }
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ============================================================================
+   SECTION 12: FEED VIEW
+   ============================================================================ */
+
+function renderFeedView() {
+    const posts = LS.get('posts', []);
+    const stories = LS.get('stories', []);
+
+    let filteredPosts = posts;
+    if (state.feedTab === 'popular') {
+        filteredPosts = [...posts].sort((a, b) => (b.likes || 0) - (a.likes || 0));
+    } else if (state.feedTab === 'following') {
+        filteredPosts = [...posts].slice(0, 3);
+    }
+
+    return `
+        <div style="max-width:760px;margin:0 auto">
+            ${renderStoriesBar(stories)}
+            ${renderComposer()}
+
+            <div class="tabs" style="margin-bottom:20px">
+                <button class="tab ${state.feedTab === 'all' ? 'active' : ''}" onclick="setFeedTab('all')">Hammasi</button>
+                <button class="tab ${state.feedTab === 'following' ? 'active' : ''}" onclick="setFeedTab('following')">Kuzatilayotgan</button>
+                <button class="tab ${state.feedTab === 'popular' ? 'active' : ''}" onclick="setFeedTab('popular')">Mashhur</button>
+            </div>
+
+            ${filteredPosts.length === 0
+                ? renderEmpty('📭', 'Hozircha postlar yo\'q')
+                : filteredPosts.map(p => renderPost(p)).join('')
+            }
+        </div>
+    `;
+}
+
+function renderStoriesBar(stories) {
+    return `
+        <div class="stories-bar">
+            <div class="story" onclick="addStory()">
+                <div class="story-ring add">+</div>
+                <div class="story-name">Story</div>
+            </div>
+            ${stories.map(s => `
+                <div class="story" onclick="viewStory('${s.id}')">
+                    <div class="story-ring ${s.seen ? 'seen' : ''}">
+                        <div class="story-inner">${esc(s.avatar)}</div>
+                    </div>
+                    <div class="story-name">${esc(s.author.split(' ')[0])}</div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function renderComposer() {
+    return `
+        <div class="composer">
+            <div class="composer-top">
+                <div class="user-avatar-sm">${esc(state.user.avatar)}</div>
+                <textarea id="composer-text" placeholder="Nima haqida o'ylayapsiz, ${esc(state.user.name)}?" oninput="updateComposerText(this.value)">${esc(state.composerText || '')}</textarea>
+            </div>
+            ${state.composerMood ? `
+                <div class="mood-chip">
+                    ${state.composerMood.emoji} ${state.composerMood.label}
+                    <button onclick="clearMood()">✕</button>
+                </div>
+            ` : ''}
+            <div class="composer-bar">
+                <button class="composer-tool" onclick="openMoodPicker()">😊 Kayfiyat</button>
+                <button class="composer-tool" onclick="toast('📷 Rasm yuklash tayyorlanmoqda')">📷 Rasm</button>
+                <button class="composer-tool" onclick="toast('🎥 Video yuklash tayyorlanmoqda')">🎥 Video</button>
+                <div style="flex:1"></div>
+                <button class="btn btn-primary btn-sm" onclick="publishPost()">Joylash</button>
+            </div>
+        </div>
+    `;
+}
+
+function updateComposerText(text) {
+    state.composerText = text;
+}
+
+function clearMood() {
+    state.composerMood = null;
+    render();
+}
+
+function setFeedTab(tab) {
+    state.feedTab = tab;
+    render();
+}
+
+function renderPost(p) {
+    return `
+        <div class="post-card">
+            <div class="post-header">
+                <div class="post-avatar">${esc(p.avatar)}</div>
+                <div class="post-author">
+                    <div class="post-author-name">
+                        ${esc(p.authorName)}
+                        ${p.verified ? '<span class="verified">✔</span>' : ''}
+                    </div>
+                    <div class="post-time">${timeAgo(p.at)}</div>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="openPostMenu('${p.id}')">⋯</button>
+            </div>
+
+            <div class="post-text">${esc(p.text)}</div>
+
+            ${p.video ? `
+                <div class="post-video" onclick="toast('🎬 Video pleyer tayyorlanmoqda')"></div>
+            ` : p.image ? `
+                <div style="margin-top:12px;border-radius:12px;overflow:hidden">
+                    <img src="${p.image}" style="width:100%;max-height:400px;object-fit:cover">
+                </div>
+            ` : ''}
+
+            ${p.tags && p.tags.length ? `
+                <div class="post-tags">
+                    ${p.tags.map(t => `
+                        <button class="post-tag" onclick="searchTag('${esc(t)}')">#${esc(t)}</button>
+                    `).join('')}
+                </div>
+            ` : ''}
+
+            <div class="post-actions">
+                <button class="post-action ${p.liked ? 'liked' : ''}" onclick="likePost('${p.id}')">
+                    ${p.liked ? '❤️' : '🤍'} ${fmt(p.likes || 0)}
+                </button>
+                <button class="post-action" onclick="openComments('${p.id}')">
+                    💬 ${fmt(p.comments || 0)}
+                </button>
+                <button class="post-action ${p.saved ? 'saved' : ''}" onclick="savePost('${p.id}')">
+                    ${p.saved ? '🔖' : '📑'} ${fmt(p.saves || 0)}
+                </button>
+                <button class="post-action" onclick="sharePost('${p.id}')">
+                    ↗️
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function publishPost() {
+    const text = ($('#composer-text')?.value || '').trim();
+    if (!text && !state.composerMood) {
+        return toast('❌ Bo\'sh post joylab bo\'lmaydi', 'error');
+    }
+
+    let finalText = text;
+    if (state.composerMood) {
+        finalText = `${state.composerMood.emoji} ${state.composerMood.label} his qilyapman\n\n${text}`;
+    }
+
+    const tags = (finalText.match(/#[\w\u0400-\u04FF]+/g) || []).map(t => t.slice(1));
+
+    const posts = LS.get('posts', []);
+    posts.unshift({
+        id: uid(),
+        userId: state.user.id,
+        authorName: state.user.name,
+        avatar: state.user.avatar,
+        verified: state.user.verified,
+        text: finalText,
+        video: false,
+        image: null,
+        likes: 0,
+        comments: 0,
+        saves: 0,
+        liked: false,
+        saved: false,
+        at: now(),
+        tags
+    });
+
+    LS.set('posts', posts);
+    state.composerText = '';
+    state.composerMood = null;
+    toast('✅ Post joylandi', 'success');
+    render();
+}
+
+function likePost(id) {
+    const posts = LS.get('posts', []);
+    const p = posts.find(x => x.id === id);
+    if (!p) return;
+    p.liked = !p.liked;
+    p.likes = (p.likes || 0) + (p.liked ? 1 : -1);
+    LS.set('posts', posts);
+    render();
+}
+
+function savePost(id) {
+    const posts = LS.get('posts', []);
+    const p = posts.find(x => x.id === id);
+    if (!p) return;
+    p.saved = !p.saved;
+    p.saves = (p.saves || 0) + (p.saved ? 1 : -1);
+    LS.set('posts', posts);
+    toast(p.saved ? '🔖 Saqlandi' : 'Saqlanganlardan olib tashlandi');
+    render();
+}
+
+function sharePost(id) {
+    const posts = LS.get('posts', []);
+    const p = posts.find(x => x.id === id);
+    if (!p) return;
+    const text = `Unigram: ${p.authorName} — ${p.text.slice(0, 100)}`;
+    if (navigator.share) {
+        navigator.share({ title: 'Unigram', text }).catch(() => {});
+    } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => toast('📋 Nusxalandi', 'success'));
+    } else {
+        toast('Ulashish imkoni yo\'q');
+    }
+}
+
+function openComments(id) {
+    const posts = LS.get('posts', []);
+    const p = posts.find(x => x.id === id);
+    if (!p) return;
+
+    showModal(`
+        <h3 class="modal-title">💬 Izohlar (${p.comments})</h3>
+        <div class="empty-state" style="padding:32px 20px">
+            <div class="empty-icon">💬</div>
+            <div class="empty-text">Izohlar tizimi tez orada</div>
+        </div>
+        <input class="input" placeholder="Izoh yozing..." style="margin-top:12px" onkeypress="if(event.key==='Enter'){toast('✅ Izoh yuborildi','success');closeModal()}">
+        <button class="btn btn-primary btn-block" style="margin-top:12px" onclick="closeModal()">Yopish</button>
+    `);
+}
+
+function openPostMenu(id) {
+    const posts = LS.get('posts', []);
+    const p = posts.find(x => x.id === id);
+    if (!p) return;
+    const isMine = p.userId === state.user.id;
+
+    showModal(`
+        <h3 class="modal-title">Post amallari</h3>
+        <button class="nav-item" style="width:100%" onclick="copyPostText('${id}')">
+            <span class="nav-icon">📋</span>
+            <span>Matnni nusxalash</span>
+        </button>
+        <button class="nav-item" style="width:100%" onclick="closeModal();toast('🚩 Shikoyat qabul qilindi')">
+            <span class="nav-icon">🚩</span>
+            <span>Shikoyat qilish</span>
+        </button>
+        ${isMine ? `
+            <button class="nav-item" style="width:100%;color:var(--danger)" onclick="deletePost('${id}')">
+                <span class="nav-icon">🗑️</span>
+                <span>O'chirish</span>
+            </button>
+        ` : ''}
+        <button class="btn btn-ghost btn-block" style="margin-top:12px" onclick="closeModal()">Bekor</button>
+    `);
+}
+
+function copyPostText(id) {
+    const posts = LS.get('posts', []);
+    const p = posts.find(x => x.id === id);
+    if (!p) return;
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(p.text).then(() => {
+            toast('📋 Nusxalandi', 'success');
+            closeModal();
+        });
+    }
+}
+
+function deletePost(id) {
+    if (!confirm('Postni o\'chirasizmi?')) return;
+    const posts = LS.get('posts', []).filter(p => p.id !== id);
+    LS.set('posts', posts);
+    closeModal();
+    toast('🗑️ O\'chirildi', 'success');
+    render();
+}
+
+function openMoodPicker() {
+    showModal(`
+        <h3 class="modal-title">😊 Kayfiyatingiz?</h3>
+        <div class="grid-4" style="gap:8px">
+            ${MOODS.map(m => `
+                <button class="game-btn" style="background:var(--bg-3);padding:16px 8px;flex-direction:column;width:100%;height:auto;border-radius:12px" onclick="setMood('${m.emoji}','${m.label}')">
+                    <span style="font-size:32px">${m.emoji}</span>
+                    <span style="font-weight:600;color:var(--text-muted);font-size:11px;margin-top:4px">${m.label}</span>
+                </button>
+            `).join('')}
+        </div>
+        <button class="btn btn-ghost btn-block" style="margin-top:16px" onclick="closeModal()">Bekor</button>
+    `);
+}
+
+function setMood(emoji, label) {
+    state.composerMood = { emoji, label };
+    closeModal();
+    render();
+}
+
+function addStory() {
+    showModal(`
+        <h3 class="modal-title">📸 Story qo'shish</h3>
+        <div class="form-field">
+            <label class="form-label">Matn</label>
+            <input class="input" id="story-text" placeholder="Nima bo'lyapti?" maxlength="80">
+        </div>
+        <div class="form-field">
+            <label class="form-label">Emoji</label>
+            <input class="input" id="story-emoji" placeholder="✨" value="✨" maxlength="4">
+        </div>
+        <button class="btn btn-primary btn-block" onclick="createStory()">Joylash</button>
+        <button class="btn btn-ghost btn-block" style="margin-top:8px" onclick="closeModal()">Bekor</button>
+    `);
+}
+
+function createStory() {
+    const text = ($('#story-text')?.value || '').trim();
+    const emoji = ($('#story-emoji')?.value || '✨').trim();
+    if (!text) return toast('❌ Matn kiriting', 'error');
+
+    const stories = LS.get('stories', []);
+    stories.unshift({
+        id: uid(),
+        userId: state.user.id,
+        author: state.user.name,
+        avatar: state.user.avatar,
+        emoji: emoji,
+        text: text,
+        seen: false
+    });
+    LS.set('stories', stories);
+    closeModal();
+    toast('✅ Story qo\'shildi', 'success');
+    render();
+}
+
+function viewStory(id) {
+    const stories = LS.get('stories', []);
+    const s = stories.find(x => x.id === id);
+    if (!s) return;
+    s.seen = true;
+    LS.set('stories', stories);
+
+    showModal(`
+        <div style="text-align:center">
+            <div style="font-size:80px;margin:20px 0">${esc(s.avatar)}</div>
+            <div style="font-size:22px;font-weight:800;margin-bottom:8px">${esc(s.author)}</div>
+            <div style="font-size:64px;margin:24px 0">${esc(s.emoji)}</div>
+            <div style="font-size:18px;padding:16px;background:var(--bg-3);border-radius:12px">${esc(s.text)}</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:12px">${timeAgo(now() - 3600000)}</div>
+        </div>
+        <button class="btn btn-ghost btn-block" style="margin-top:20px" onclick="closeModal();render()">Yopish</button>
+    `);
+}
+
+/* ============================================================================
+   SECTION 13: TREND VIEW
+   ============================================================================ */
+
+function renderTrendView() {
+    const posts = LS.get('posts', []);
+    const hours = state.trendRange === 'day' ? 24 : state.trendRange === 'week' ? 168 : 720;
+    const cutoff = now() - hours * 3600000;
+    const filtered = posts.filter(p => p.at > cutoff);
+
+    const tagCounts = {};
+    filtered.forEach(p => (p.tags || []).forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; }));
+    const trending = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+    return `
+        <div class="page-header">
+            <h1 class="page-title">🔥 Trend Top</h1>
+            <p class="page-subtitle">Eng qizg'in mavzular va postlar</p>
+        </div>
+
+        <div class="tabs" style="margin-bottom:20px">
+            <button class="tab ${state.trendRange === 'day' ? 'active' : ''}" onclick="setTrendRange('day')">Bugun</button>
+            <button class="tab ${state.trendRange === 'week' ? 'active' : ''}" onclick="setTrendRange('week')">Hafta</button>
+            <button class="tab ${state.trendRange === 'month' ? 'active' : ''}" onclick="setTrendRange('month')">Oy</button>
+        </div>
+
+        <h2 style="font-size:18px;font-weight:800;margin:20px 0 12px">Top hashtaglar</h2>
+        ${trending.length === 0
+            ? renderEmpty('📉', 'Bu davrda hashtag yo\'q')
+            : `<div class="grid-2" style="margin-bottom:24px">
+                ${trending.map(([tag, count], i) => `
+                    <div class="card card-interactive" onclick="searchTag('${tag}')">
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <div class="rank-badge ${i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-default'}">${i + 1}</div>
+                            <div style="flex:1">
+                                <div style="font-weight:700;font-size:15px">#${esc(tag)}</div>
+                                <div style="font-size:12px;color:var(--text-muted)">${count} ta post</div>
+                            </div>
+                            <div style="font-size:20px;color:var(--primary)">📈</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>`
+        }
+
+        <h2 style="font-size:18px;font-weight:800;margin:20px 0 12px">Top postlar</h2>
+        ${filtered.length === 0
+            ? renderEmpty('📉', 'Bu davrda post yo\'q')
+            : filtered.slice(0, 10).map((p, i) => `
+                <div style="display:flex;gap:12px;margin-bottom:12px">
+                    <div class="rank-badge ${i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-default'}" style="margin-top:20px">${i + 1}</div>
+                    <div style="flex:1">${renderPost(p)}</div>
+                </div>
+            `).join('')
+        }
+    `;
+}
+
+function setTrendRange(range) {
+    state.trendRange = range;
+    render();
+}
+
+function searchTag(tag) {
+    state.searchQuery = '#' + tag;
+    state.view = 'search';
+    render();
+}
+
+/* ============================================================================
+   SECTION 14: CRYPTO VIEW
+   ============================================================================ */
+
+function renderCryptoView() {
+    const crypto = LS.get('crypto', []);
+    const portfolioValue = crypto.reduce((s, c) => s + (c.holdings || 0) * c.price, 0);
+
+    let filtered = crypto;
+    if (state.cryptoFilter === 'gainers') filtered = crypto.filter(c => c.change24 > 0);
+    if (state.cryptoFilter === 'losers') filtered = crypto.filter(c => c.change24 < 0);
+    if (state.cryptoFilter === 'holdings') filtered = crypto.filter(c => c.holdings > 0);
+
+    return `
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+            <div>
+                <h1 class="page-title">📈 Kripto Bozori</h1>
+                <p class="page-subtitle">Jonli narxlar va savdo</p>
+            </div>
+            <div class="balance-chip" style="margin:0">
+                💼 Portfolio: ${fmtPrice(portfolioValue)}
+            </div>
+        </div>
+
+        <div class="tabs" style="margin-bottom:20px">
+            <button class="tab ${state.cryptoFilter === 'all' ? 'active' : ''}" onclick="setCryptoFilter('all')">Barchasi</button>
+            <button class="tab ${state.cryptoFilter === 'gainers' ? 'active' : ''}" onclick="setCryptoFilter('gainers')">📈 O'sayotganlar</button>
+            <button class="tab ${state.cryptoFilter === 'losers' ? 'active' : ''}" onclick="setCryptoFilter('losers')">📉 Tushayotganlar</button>
+            <button class="tab ${state.cryptoFilter === 'holdings' ? 'active' : ''}" onclick="setCryptoFilter('holdings')">💼 Mening</button>
+        </div>
+
+        ${filtered.length === 0
+            ? renderEmpty('📊', 'Bu filtrda tangalar yo\'q')
+            : `<div class="grid-2">
+                ${filtered.map(c => renderCryptoCard(c)).join('')}
+            </div>`
+        }
+    `;
+}
+
+function renderCryptoCard(c) {
+    const isUp = c.change24 >= 0;
+    return `
+        <div class="crypto-card">
+            <div class="crypto-header">
+                <div style="display:flex;align-items:center;gap:12px">
+                    <div class="crypto-icon">${esc(c.symbol)}</div>
+                    <div>
+                        <div style="font-weight:700;font-size:15px">${esc(c.name)}</div>
+                        <div style="font-size:11px;color:var(--text-muted)">${esc(c.symbol)}</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="crypto-price">${fmtPrice(c.price)}</div>
+                    <div class="crypto-change ${isUp ? 'price-up' : 'price-down'}">
+                        ${isUp ? '▲' : '▼'} ${Math.abs(c.change24).toFixed(2)}%
+                    </div>
+                </div>
+            </div>
+            ${c.holdings > 0 ? `
+                <div class="crypto-holdings">
+                    Sizda: <b style="color:var(--text)">${c.holdings.toFixed(4)} ${esc(c.symbol)}</b> (${fmtPrice(c.holdings * c.price)})
+                </div>
+            ` : ''}
+            <div style="display:flex;gap:8px">
+                <button class="btn btn-primary btn-sm" style="flex:1" onclick="openTradeModal('${c.symbol}','buy')">
+                    🛒 Sotib olish
+                </button>
+                <button class="btn btn-ghost btn-sm" style="flex:1" onclick="openTradeModal('${c.symbol}','sell')">
+                    💵 Sotish
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function setCryptoFilter(f) {
+    state.cryptoFilter = f;
+    render();
+}
+
+function openTradeModal(symbol, mode) {
+    const crypto = LS.get('crypto', []);
+    const c = crypto.find(x => x.symbol === symbol);
+    if (!c) return;
+
+    showModal(`
+        <h3 class="modal-title">${mode === 'buy' ? '🛒 Sotib olish' : '💵 Sotish'} — ${esc(c.name)}</h3>
+
+        <div class="card-flat" style="margin-bottom:16px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                <span style="color:var(--text-muted)">Narx:</span>
+                <b>${fmtPrice(c.price)}</b>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                <span style="color:var(--text-muted)">Sizda:</span>
+                <b>${c.holdings.toFixed(4)} ${esc(c.symbol)}</b>
+            </div>
+            <div style="display:flex;justify-content:space-between">
+                <span style="color:var(--text-muted)">Balans:</span>
+                <b>${fmt(state.user.coins || 0)} UGC</b>
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label class="form-label">Miqdor (${esc(c.symbol)})</label>
+            <input type="number" class="input" id="trade-amount" placeholder="0.00" step="0.0001" min="0.0001" oninput="updateTradeTotal('${c.symbol}')">
+        </div>
+
+        <div style="font-size:14px;color:var(--text-muted);margin-bottom:16px" id="trade-total">
+            Jami: — UGC
+        </div>
+
+        <button class="btn btn-primary btn-block" onclick="executeTrade('${c.symbol}','${mode}')">
+            Tasdiqlash
+        </button>
+        <button class="btn btn-ghost btn-block" style="margin-top:8px" onclick="closeModal()">
+            Bekor
+        </button>
+    `);
+}
+
+function updateTradeTotal(symbol) {
+    const crypto = LS.get('crypto', []);
+    const c = crypto.find(x => x.symbol === symbol);
+    if (!c) return;
+    const amt = parseFloat($('#trade-amount')?.value) || 0;
+    const total = amt * c.price;
+    const el = $('#trade-total');
+    if (el) el.textContent = `Jami: ${fmt(total)} UGC`;
+}
+
+function executeTrade(symbol, mode) {
+    const amt = parseFloat($('#trade-amount')?.value) || 0;
+    if (amt <= 0) return toast('❌ Miqdor kiriting', 'error');
+
+    const crypto = LS.get('crypto', []);
+    const c = crypto.find(x => x.symbol === symbol);
+    if (!c) return;
+
+    const total = amt * c.price;
+
+    if (mode === 'buy') {
+        if ((state.user.coins || 0) < total) {
+            return toast('❌ Mablag\' yetarli emas', 'error');
+        }
+        state.user.coins -= total;
+        c.holdings = (c.holdings || 0) + amt;
+    } else {
+        if ((c.holdings || 0) < amt) {
+            return toast('❌ Yetarli tanga yo\'q', 'error');
+        }
+        c.holdings -= amt;
+        state.user.coins = (state.user.coins || 0) + total;
+    }
+
+    // Small price movement
+    c.price *= (1 + (Math.random() - 0.5) * 0.02);
+
+    LS.set('crypto', crypto);
+    LS.set('user', state.user);
+    closeModal();
+    toast(mode === 'buy' ? '✅ Sotib olindi' : '✅ Sotildi', 'success');
+    render();
+}
+
+function updateCryptoPrices() {
+    if (!state.user) return;
+    const crypto = LS.get('crypto', []);
+    if (!crypto.length) return;
+
+    crypto.forEach(c => {
+        const delta = (Math.random() - 0.5) * 0.02;
+        c.price *= (1 + delta);
+        c.change24 = (c.change24 || 0) + delta * 100;
+        // Cap change
+        if (c.change24 > 30) c.change24 = 30;
+        if (c.change24 < -30) c.change24 = -30;
+    });
+    LS.set('crypto', crypto);
+
+    if (state.view === 'crypto') {
+        render();
+    }
+}
+
+/* ============================================================================
+   SECTION 15: E-COMMERCE VIEW
+   ============================================================================ */
+
+function renderEcommerceView() {
+    const products = LS.get('products', []);
+    const cartCount = state.cart.reduce((s, i) => s + i.qty, 0);
+
+    return `
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+            <div>
+                <h1 class="page-title">🛍️ Unigram Market</h1>
+                <p class="page-subtitle">Xavfsiz xarid</p>
+            </div>
+            <button class="btn btn-primary" onclick="openCartModal()">
+                🛒 Savat ${cartCount > 0 ? `<span class="cart-badge">${cartCount}</span>` : ''}
+            </button>
+        </div>
+
+        <div class="grid-3">
+            ${products.map(p => renderProductCard(p)).join('')}
+        </div>
+    `;
+}
+
+function renderProductCard(p) {
+    return `
+        <div class="product-card">
+            <div class="product-img">${esc(p.emoji)}</div>
+            <div class="product-name">${esc(p.name)}</div>
+            <div class="product-desc">${esc(p.desc)}</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                <div class="product-price">$${p.price}</div>
+                <div style="font-size:12px;color:var(--text-muted)">⭐ ${p.rating}</div>
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px">
+                👤 ${esc(p.seller)}
+            </div>
+            <button class="btn btn-primary btn-sm btn-block" onclick="addToCart('${p.id}')">
+                🛒 Savatga
+            </button>
+        </div>
+    `;
+}
+
+function addToCart(id) {
+    const existing = state.cart.find(x => x.id === id);
+    if (existing) existing.qty++;
+    else state.cart.push({ id, qty: 1 });
+    LS.set('cart', state.cart);
+    toast('✅ Savatga qo\'shildi', 'success');
+    render();
+}
+
+function openCartModal() {
+    const products = LS.get('products', []);
+    const cart = state.cart;
+
+    if (cart.length === 0) {
+        showModal(`
+            <h3 class="modal-title">🛒 Savat</h3>
+            ${renderEmpty('🛒', 'Savat bo\'sh')}
+            <button class="btn btn-ghost btn-block" style="margin-top:16px" onclick="closeModal()">Yopish</button>
+        `);
+        return;
+    }
+
+    const total = cart.reduce((s, i) => {
+        const p = products.find(pr => pr.id === i.id);
+        return s + i.qty * (p?.price || 0);
+    }, 0);
+
+    showModal(`
+        <h3 class="modal-title">🛒 Savat (${cart.length} ta)</h3>
+        <div style="max-height:320px;overflow-y:auto;margin-bottom:16px">
+            ${cart.map(item => {
+                const p = products.find(x => x.id === item.id);
+                if (!p) return '';
+                return `
+                    <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);align-items:center">
+                        <div style="font-size:32px">${esc(p.emoji)}</div>
+                        <div style="flex:1">
+                            <div style="font-weight:700;font-size:14px">${esc(p.name)}</div>
+                            <div style="font-size:12px;color:var(--text-muted)">$${p.price} × ${item.qty}</div>
+                        </div>
+                        <div style="font-weight:800">$${(p.price * item.qty).toFixed(2)}</div>
+                        <button class="btn btn-ghost btn-sm" onclick="removeFromCart('${item.id}')">✕</button>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:16px 0;font-size:18px;font-weight:900;border-top:2px solid var(--border)">
+            <span>Jami:</span>
+            <span style="color:var(--primary)">$${total.toFixed(2)}</span>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="checkout()">💳 To'lash</button>
+        <button class="btn btn-ghost btn-block" style="margin-top:8px" onclick="closeModal()">Davom etish</button>
+    `);
+}
+
+function removeFromCart(id) {
+    state.cart = state.cart.filter(x => x.id !== id);
+    LS.set('cart', state.cart);
+    closeModal();
+    openCartModal();
+    render();
+}
+
+function checkout() {
+    if (state.cart.length === 0) return;
+    const products = LS.get('products', []);
+    const total = state.cart.reduce((s, i) => {
+        const p = products.find(pr => pr.id === i.id);
+        return s + i.qty * (p?.price || 0);
+    }, 0);
+
+    // Convert to coins (1 USD = 100 UGC for demo)
+    const coinsNeeded = total * 100;
+    if ((state.user.coins || 0) < coinsNeeded) {
+        return toast(`❌ ${fmt(coinsNeeded)} UGC kerak. Sizda: ${fmt(state.user.coins || 0)}`, 'error');
+    }
+
+    state.user.coins -= coinsNeeded;
+    LS.set('user', state.user);
+
+    const orders = LS.get('orders', []);
+    orders.unshift({
+        id: uid(),
+        items: [...state.cart],
+        total: total,
+        coinsSpent: coinsNeeded,
+        at: now(),
+        status: 'paid'
+    });
+    LS.set('orders', orders);
+
+    state.cart = [];
+    LS.set('cart', state.cart);
+    closeModal();
+    toast('✅ Buyurtma qabul qilindi!', 'success');
+    render();
+}
+
+/* ============================================================================
+   SECTION 16: AI VIEW
+   ============================================================================ */
+
+function renderAIListView() {
+    return `
+        <div class="page-header">
+            <h1 class="page-title">🤖 AI Markazi</h1>
+            <p class="page-subtitle">20 xil mutaxassis AI yordamchi</p>
+        </div>
+
+        <div class="grid-auto-sm">
+            ${AI_BOTS.map(bot => {
+                const history = state.aiHistory[bot.id] || [];
+                return `
+                    <div class="ai-card" onclick="openAIChat(${bot.id})">
+                        <span class="ai-emoji">${bot.icon}</span>
+                        <div class="ai-name">${esc(bot.name)}</div>
+                        <div class="ai-desc">${esc(bot.desc)}</div>
+                        ${history.length > 0 ? `<div style="font-size:11px;color:var(--primary);margin-top:6px">${history.length} xabar</div>` : ''}
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+}
+
+function openAIChat(botId) {
+    state.activeBot = AI_BOTS.find(b => b.id === botId);
+    state.view = 'ai-chat';
+    render();
+}
+
+function renderAIChatView() {
+    if (!state.activeBot) {
+        state.view = 'ai';
+        return renderAIListView();
+    }
+    const bot = state.activeBot;
+    const history = state.aiHistory[bot.id] || [];
+
+    return `
+        <div class="chat-container">
+            <div class="chat-header">
+                <button class="btn btn-ghost btn-sm" onclick="state.view='ai';state.activeBot=null;render()">←</button>
+                <div style="font-size:32px">${bot.icon}</div>
+                <div style="flex:1">
+                    <div style="font-weight:800">${esc(bot.name)}</div>
+                    <div style="font-size:12px;color:var(--primary)">● Onlayn</div>
+                </div>
+            </div>
+
+            <div class="chat-body" id="chat-body">
+                ${history.length === 0 ? `
+                    <div class="empty-state">
+                        <div class="empty-icon">${bot.icon}</div>
+                        <div style="font-weight:700;font-size:18px;margin-bottom:6px">${esc(bot.name)}</div>
+                        <div class="text-sm text-muted">${esc(bot.desc)}</div>
+                        <div style="font-size:12px;color:var(--text-muted);margin-top:12px">Savol bering va javob oling</div>
+                    </div>
+                ` : history.map(m => `
+                    <div class="chat-bubble ${m.from === 'me' ? 'me' : 'ai'}">${esc(m.text)}</div>
+                `).join('')}
+            </div>
+
+            <form onsubmit="sendAIMessage(event)" class="chat-input-bar">
+                <input type="text" id="ai-input" placeholder="Xabar yozing..." autocomplete="off" required>
+                <button type="submit" class="btn btn-primary">➤</button>
+            </form>
+        </div>
+    `;
+}
+
+function scrollChatToBottom() {
+    const body = $('#chat-body');
+    if (body) body.scrollTop = body.scrollHeight;
+}
+
+function sendAIMessage(e) {
+    e.preventDefault();
+    const input = $('#ai-input');
+    const text = input.value.trim();
+    if (!text || !state.activeBot) return;
+
+    const botId = state.activeBot.id;
+    if (!state.aiHistory[botId]) state.aiHistory[botId] = [];
+
+    state.aiHistory[botId].push({ from: 'me', text, at: now() });
+    LS.set('ai_history', state.aiHistory);
+    input.value = '';
+    render();
+
+    // Show typing indicator
+    setTimeout(() => {
+        const reply = generateAIReply(state.activeBot, text);
+        state.aiHistory[botId].push({ from: 'ai', text: reply, at: now() });
+        LS.set('ai_history', state.aiHistory);
+        render();
+    }, 700 + Math.random() * 800);
+}
+
+function generateAIReply(bot, userText) {
+    const t = userText.toLowerCase().trim();
+
+    // Greetings
+    const greetings = ['salom', 'assalom', 'hey', 'hi', 'qalay', 'qandaysan'];
+    if (greetings.some(g => t.includes(g))) {
+        return `Salom! Men ${bot.name} man. ${bot.desc} bo'yicha yordam bera olaman. Nima haqida gaplashamiz? 😊`;
+    }
+
+    // Thanks
+    if (t.includes('rahmat') || t.includes('tashakkur')) {
+        return 'Arzimaydi! 😊 Yana savolingiz bo\'lsa, bemalol yozing.';
+    }
+
+    // Bye
+    if (t.includes('xayr') || t.includes('bye') || t.includes('ko\'rishguncha')) {
+        return 'Xayr! Yana tashrif buyuring. 👋';
+    }
+
+    // Yes/No
+    if (t === 'ha' || t === 'yes') {
+        return 'Yaxshi! Yana nima haqida gaplashamiz?';
+    }
+    if (t === 'yo\'q' || t === 'no') {
+        return 'Tushundim. Boshqa savolingiz bormi?';
+    }
+
+    // Match topics
+    const matchedTopics = bot.topics.filter(topic => t.includes(topic));
+    if (matchedTopics.length > 0) {
+        const replies = bot.replies;
+        return replies[Math.floor(Math.random() * replies.length)];
+    }
+
+    // Question mark
+    if (t.includes('?')) {
+        const replies = bot.replies;
+        return replies[Math.floor(Math.random() * replies.length)];
+    }
+
+    // Default - use bot-specific replies
+    const replies = bot.replies;
+    return replies[Math.floor(Math.random() * replies.length)];
+}
+
+/* ============================================================================
+   SECTION 17: GAMES VIEW
+   ============================================================================ */
+
+function renderGamesView() {
+    if (state.activeGame) return renderActiveGame();
+
+    return `
+        <div class="page-header">
+            <h1 class="page-title">🎮 O'yinlar</h1>
+            <p class="page-subtitle">10 xil o'yin — UGC pul yutib oling</p>
+        </div>
+
+        <div class="grid-auto-sm">
+            ${GAMES.map(g => `
+                <div class="game-card" onclick="startGame('${g.id}')">
+                    <span class="game-icon">${g.icon}</span>
+                    <div class="game-name">${esc(g.name)}</div>
+                    <div class="game-desc">${esc(g.desc)}</div>
+                    <div style="font-size:11px;color:var(--gold);margin-top:6px;font-weight:700">🪙 +${g.reward} UGC</div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function startGame(id) {
+    state.activeGame = id;
+    state.gameState = { score: 0, status: 'start' };
+    clearInterval(state.gameTimer);
+
+    if (id === 'clicker') {
+        state.gameState.timeLeft = 15;
+        state.gameState.score = 0;
+    } else if (id === 'reaction') {
+        state.gameState.status = 'waiting';
+    } else if (id === 'memory') {
+        initMemoryGame();
+    } else if (id === 'guess') {
+        state.gameState.target = randInt(1, 100);
+        state.gameState.tries = 0;
+    } else if (id === 'math') {
+        state.gameState.round = 0;
+        state.gameState.score = 0;
+        newMathProblem();
+    } else if (id === 'color') {
+        state.gameState.round = 0;
+        state.gameState.score = 0;
+        newColorRound();
+    } else if (id === 'word') {
+        const words = ['unigram', 'dastur', 'kompyuter', 'tarmoq', 'algoritm', 'dasturchi', 'internet'];
+        state.gameState.word = words[randInt(0, words.length - 1)];
+        state.gameState.guessed = [];
+        state.gameState.lives = 6;
+    } else if (id === 'sequence') {
+        state.gameState.seq = [1, 2, 4, 8, 16, 32];
+        state.gameState.next = 64;
+        state.gameState.score = 0;
+    } else if (id === 'typing') {
+        state.gameState.phrases = [
+            'unigram kelajak tarmog\'i',
+            'tez yozish san\'ati',
+            'dasturlash o\'rganish kerak',
+            'sun\'iy intellekt kelajak'
+        ];
+        state.gameState.phrase = state.gameState.phrases[randInt(0, 3)];
+        state.gameState.startTime = now();
+    } else if (id === 'quiz') {
+        state.gameState.questions = [
+            { q: 'O\'zbekiston poytaxti?', options: ['Toshkent', 'Samarqand', 'Buxoro', 'Xiva'], correct: 0 },
+            { q: '2 + 2 × 2 = ?', options: ['6', '8', '4', '10'], correct: 0 },
+            { q: 'Eng katta sayyora?', options: ['Yupiter', 'Yer', 'Mars', 'Saturn'], correct: 0 },
+            { q: 'Python qanday til?', options: ['Programmalash', 'Belgi', 'Ovqat', 'Hayvon'], correct: 0 },
+            { q: '1 km = ? metr', options: ['1000', '100', '10000', '500'], correct: 0 }
+        ];
+        state.gameState.qIndex = 0;
+        state.gameState.score = 0;
+    }
+
+    render();
+}
+
+function renderActiveGame() {
+    const game = GAMES.find(g => g.id === state.activeGame);
+    if (!game) return renderGamesView();
+
+    return `
+        <div style="max-width:640px;margin:0 auto">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+                <button class="btn btn-ghost btn-sm" onclick="exitGame()">← Orqaga</button>
+                <h1 style="font-size:22px;font-weight:900;margin:0">${game.icon} ${esc(game.name)}</h1>
+            </div>
+
+            <div class="card">
+                <div class="game-area" id="game-area">
+                    ${renderGameContent()}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderGameContent() {
+    const gs = state.gameState;
+    if (!gs) return '';
+
+    switch (state.activeGame) {
+        case 'clicker': return renderClickerGame(gs);
+        case 'reaction': return renderReactionGame(gs);
+        case 'memory': return renderMemoryGame(gs);
+        case 'guess': return renderGuessGame(gs);
+        case 'math': return renderMathGame(gs);
+        case 'color': return renderColorGame(gs);
+        case 'word': return renderWordGame(gs);
+        case 'sequence': return renderSequenceGame(gs);
+        case 'typing': return renderTypingGame(gs);
+        case 'quiz': return renderQuizGame(gs);
+        default: return '';
+    }
+}
+
+/* --- Clicker Game --- */
+function renderClickerGame(gs) {
+    return `
+        <div class="game-score" id="game-score">${gs.score || 0}</div>
+        <div class="game-timer" id="game-timer">⏱ ${gs.timeLeft || 15}s</div>
+        <button class="game-btn" style="width:140px;height:140px;font-size:64px;background:linear-gradient(135deg,#00F0FF,#00b8c4);color:#0a0e1a;margin-bottom:16px" onclick="clickerClick()">🪙</button>
+        ${gs.status === 'start' ? `
+            <button class="btn btn-primary btn-lg" style="margin-top:8px" onclick="startClickerGame()">Boshlash</button>
+        ` : gs.status === 'done' ? `
+            <div class="game-message success">🎉 Siz ${gs.score} tanga topdingiz!</div>
+            <button class="btn btn-primary" onclick="startGame('clicker')">Yana o'ynash</button>
+        ` : `<div style="color:var(--text-muted);font-size:13px">Tepada tangani bosing!</div>`}
+    `;
+}
+
+function startClickerGame() {
+    state.gameState.status = 'playing';
+    state.gameState.score = 0;
+    state.gameState.timeLeft = 15;
+
+    state.gameTimer = setInterval(() => {
+        state.gameState.timeLeft--;
+        const timer = $('#game-timer');
+        if (timer) timer.textContent = `⏱ ${state.gameState.timeLeft}s`;
+
+        if (state.gameState.timeLeft <= 0) {
+            clearInterval(state.gameTimer);
+            state.gameState.status = 'done';
+            finishGame('clicker', state.gameState.score, GAMES[0].reward + state.gameState.score);
+            render();
+        }
+    }, 1000);
+
+    render();
+}
+
+function clickerClick() {
+    if (state.gameState?.status !== 'playing') return;
+    state.gameState.score++;
+    const el = $('#game-score');
+    if (el) el.textContent = state.gameState.score;
+}
+
+/* --- Reaction Game --- */
+function renderReactionGame(gs) {
+    if (gs.status === 'waiting') {
+        return `
+            <div class="game-message">Kuting...</div>
+            <button class="game-btn" style="width:200px;height:200px;background:var(--danger);color:white;font-size:18px" onclick="reactionClick()">Kutish</button>
+        `;
+    }
+    if (gs.status === 'go') {
+        return `
+            <div class="game-message success">BOSING!</div>
+            <button class="game-btn" style="width:200px;height:200px;background:var(--success);color:white;font-size:22px;font-weight:900" onclick="reactionClick()">BOS!</button>
+        `;
+    }
+    if (gs.status === 'done') {
+        return `
+            <div class="game-score">${gs.time || 0} ms</div>
+            <div style="color:var(--text-muted);margin-bottom:20px">Reaksiya vaqtingiz</div>
+            <button class="btn btn-primary" onclick="startGame('reaction')">Yana o'ynash</button>
+        `;
+    }
+    return `<button class="btn btn-primary btn-lg" onclick="startReactionGame()">Boshlash</button>`;
+}
+
+function startReactionGame() {
+    state.gameState.status = 'waiting';
+    render();
+
+    const delay = 1500 + Math.random() * 3000;
+    setTimeout(() => {
+        if (state.gameState && state.gameState.status === 'waiting') {
+            state.gameState.status = 'go';
+            state.gameState.goTime = now();
+            render();
+        }
+    }, delay);
+}
+
+function reactionClick() {
+    if (!state.gameState) return;
+
+    if (state.gameState.status === 'waiting') {
+        toast('❌ Juda erta!', 'error');
+        state.gameState.status = 'start';
+        render();
+        return;
+    }
+
+    if (state.gameState.status === 'go') {
+        state.gameState.time = now() - state.gameState.goTime;
+        state.gameState.status = 'done';
+
+        let reward = 5;
+        if (state.gameState.time < 250) reward = 50;
+        else if (state.gameState.time < 400) reward = 30;
+        else if (state.gameState.time < 600) reward = 20;
+        else reward = 10;
+
+        finishGame('reaction', state.gameState.time, reward);
+        render();
+    }
+}
+
+/* --- Memory Game --- */
+function initMemoryGame() {
+    const emojis = ['🍎', '🍌', '🍇', '🍓', '🍒', '🍑', '🥝', '🍍'];
+    const cards = [...emojis, ...emojis].map(v => ({ value: v, flipped: false, matched: false }));
+    const shuffled = shuffle(cards);
+
+    state.gameState.cards = shuffled;
+    state.gameState.flippedIndices = [];
+    state.gameState.moves = 0;
+    state.gameState.status = 'playing';
+}
+
+function renderMemoryGame(gs) {
+    return `
+        <div style="margin-bottom:16px;color:var(--text-muted)">Urinishlar: ${gs.moves || 0} · Topildi: ${(gs.cards || []).filter(c => c.matched).length / 2}/8</div>
+        <div class="memory-grid">
+            ${(gs.cards || []).map((c, i) => `
+                <button class="memory-card ${c.matched ? 'matched' : c.flipped ? 'flipped' : ''}" onclick="flipMemoryCard(${i})">
+                    ${c.flipped || c.matched ? c.value : '?'}
+                </button>
+            `).join('')}
+        </div>
+    `;
+}
+
+function flipMemoryCard(i) {
+    const cards = state.gameState.cards;
+    if (!cards || cards[i].matched || cards[i].flipped) return;
+    if (state.gameState.flippedIndices.length >= 2) return;
+
+    cards[i].flipped = true;
+    state.gameState.flippedIndices.push(i);
+
+    if (state.gameState.flippedIndices.length === 2) {
+        state.gameState.moves++;
+        const [a, b] = state.gameState.flippedIndices;
+
+        if (cards[a].value === cards[b].value) {
+            cards[a].matched = true;
+            cards[b].matched = true;
+            state.gameState.flippedIndices = [];
+            render();
+
+            if (cards.every(c => c.matched)) {
+                const reward = Math.max(5, 30 - state.gameState.moves);
+                finishGame('memory', 8, reward);
+            }
+        } else {
+            render();
+            setTimeout(() => {
+                cards[a].flipped = false;
+                cards[b].flipped = false;
+                state.gameState.flippedIndices = [];
+                render();
+            }, 800);
+        }
+    } else {
+        render();
+    }
+}
+
+/* --- Guess Game --- */
+function renderGuessGame(gs) {
+    return `
+        <div class="game-message">1 dan 100 gacha raqam toping</div>
+        <div style="color:var(--text-muted);margin-bottom:20px">Urinishlar: ${gs.tries || 0}</div>
+        <input type="number" class="input" id="guess-input" placeholder="Raqam" style="max-width:200px;text-align:center;font-size:24px" min="1" max="100" onkeypress="if(event.key==='Enter')guessNumber()">
+        <button class="btn btn-primary" style="margin-top:12px" onclick="guessNumber()">Tekshirish</button>
+        ${gs.hint ? `<div class="game-message ${gs.hintType === 'correct' ? 'success' : 'error'}" style="margin-top:16px">${gs.hint}</div>` : ''}
+    `;
+}
+
+function guessNumber() {
+    const input = $('#guess-input');
+    const v = parseInt(input?.value);
+    if (!v || v < 1 || v > 100) return toast('❌ 1-100 kiriting', 'error');
+
+    state.gameState.tries = (state.gameState.tries || 0) + 1;
+
+    if (v === state.gameState.target) {
+        state.gameState.hint = `🎉 To'g'ri! ${state.gameState.tries} urinishda topdingiz`;
+        state.gameState.hintType = 'correct';
+        const reward = Math.max(5, 30 - state.gameState.tries);
+        render();
+        setTimeout(() => finishGame('guess', state.gameState.tries, reward), 1000);
+    } else if (v < state.gameState.target) {
+        state.gameState.hint = '⬆️ Kattaroq';
+        state.gameState.hintType = 'wrong';
+        render();
+    } else {
+        state.gameState.hint = '⬇️ Kichikroq';
+        state.gameState.hintType = 'wrong';
+        render();
+    }
+}
+
+/* --- Math Game --- */
+function newMathProblem() {
+    const a = randInt(1, 20);
+    const b = randInt(1, 20);
+    const ops = ['+', '-', '×'];
+    const op = ops[randInt(0, 2)];
+
+    let ans;
+    if (op === '+') ans = a + b;
+    else if (op === '-') ans = a - b;
+    else ans = a * b;
+
+    state.gameState.problem = `${a} ${op} ${b}`;
+    state.gameState.answer = ans;
+}
+
+function renderMathGame(gs) {
+    return `
+        <div class="game-message">${gs.problem} = ?</div>
+        <div style="color:var(--text-muted);margin-bottom:20px">To'g'ri: ${gs.score || 0}/5</div>
+        <input type="number" class="input" id="math-answer" placeholder="Javob" style="max-width:200px;text-align:center;font-size:24px" onkeypress="if(event.key==='Enter')checkMath()">
+        <button class="btn btn-primary" style="margin-top:12px" onclick="checkMath()">Tekshirish</button>
+    `;
+}
+
+function checkMath() {
+    const v = parseInt($('#math-answer')?.value);
+    if (isNaN(v)) return;
+
+    if (v === state.gameState.answer) {
+        state.gameState.score = (state.gameState.score || 0) + 1;
+        state.gameState.round = (state.gameState.round || 0) + 1;
+
+        if (state.gameState.score >= 5) {
+            finishGame('math', 5, 20);
+            return;
+        }
+
+        newMathProblem();
+        toast('✅ To\'g\'ri', 'success');
+    } else {
+        toast(`❌ Xato. Javob: ${state.gameState.answer}`, 'error');
+        newMathProblem();
+    }
+    render();
+}
+
+/* --- Color Game --- */
+function newColorRound() {
+    const baseHue = randInt(0, 360);
+    const diff = randInt(15, 30);
+    const oddIndex = randInt(0, 8);
+
+    state.gameState.colors = Array.from({ length: 9 }, (_, i) =>
+        `hsl(${i === oddIndex ? baseHue + diff : baseHue}, 70%, 55%)`
+    );
+    state.gameState.oddIndex = oddIndex;
+}
+
+function renderColorGame(gs) {
+    return `
+        <div class="game-message">Farqli rangni toping</div>
+        <div style="color:var(--text-muted);margin-bottom:16px">To'g'ri: ${gs.score || 0}/5</div>
+        <div class="color-grid">
+            ${(gs.colors || []).map((c, i) => `
+                <button class="color-btn" style="background:${c}" onclick="pickColor(${i})"></button>
+            `).join('')}
+        </div>
+    `;
+}
+
+function pickColor(i) {
+    if (i === state.gameState.oddIndex) {
+        state.gameState.score = (state.gameState.score || 0) + 1;
+
+        if (state.gameState.score >= 5) {
+            finishGame('color', 5, 15);
+            return;
+        }
+
+        newColorRound();
+        toast('✅ To\'g\'ri', 'success');
+    } else {
+        toast('❌ Xato', 'error');
+    }
+    render();
+}
+
+/* --- Word Game --- */
+function renderWordGame(gs) {
+    const word = gs.word || '';
+    const guessed = gs.guessed || [];
+    const display = word.split('').map(l => guessed.includes(l) ? l : '_').join(' ');
+    const lives = gs.lives || 6;
+    const wrongGuesses = guessed.filter(l => !word.includes(l)).length;
+
+    return `
+        <div class="game-message">So'zni toping</div>
+        <div style="color:var(--danger);margin-bottom:8px">❤️ ${lives - wrongGuesses} qolgan</div>
+        <div class="word-display">${display.toUpperCase()}</div>
+        <div class="letter-grid">
+            ${'abcdefghijklmnopqrstuvwxyz'.split('').map(l => `
+                <button class="letter-btn" ${guessed.includes(l) ? 'disabled' : ''} onclick="guessLetter('${l}')">${l.toUpperCase()}</button>
+            `).join('')}
+        </div>
+    `;
+}
+
+function guessLetter(l) {
+    const gs = state.gameState;
+    if (!gs || gs.guessed.includes(l)) return;
+
+    gs.guessed.push(l);
+    const word = gs.word;
+    const wrongGuesses = gs.guessed.filter(x => !word.includes(x)).length;
+
+    if (wrongGuesses >= 6) {
+        toast(`❌ Yutqazdingiz! So'z: ${word}`, 'error');
+        gs.status = 'done';
+        render();
+        setTimeout(() => { exitGame(); }, 2000);
+        return;
+    }
+
+    if (word.split('').every(c => gs.guessed.includes(c))) {
+        finishGame('word', word.length, 25);
+        return;
+    }
+
+    render();
+}
+
+/* --- Sequence Game --- */
+function renderSequenceGame(gs) {
+    return `
+        <div class="game-message">Ketma-ketlikni davom ettiring</div>
+        <div style="color:var(--text-muted);margin-bottom:16px">To'g'ri: ${gs.score || 0}/3</div>
+        <div style="font-size:28px;font-weight:900;margin-bottom:24px;color:var(--primary);font-family:'Space Mono',monospace">
+            ${(gs.seq || []).join(', ')}, ?
+        </div>
+        <input type="number" class="input" id="seq-answer" placeholder="Javob" style="max-width:200px;text-align:center;font-size:24px" onkeypress="if(event.key==='Enter')checkSequence()">
+        <button class="btn btn-primary" style="margin-top:12px" onclick="checkSequence()">Tekshirish</button>
+    `;
+}
+
+function checkSequence() {
+    const v = parseInt($('#seq-answer')?.value);
+    if (isNaN(v)) return;
+
+    const gs = state.gameState;
+    if (v === gs.next) {
+        gs.score = (gs.score || 0) + 1;
+
+        if (gs.score >= 3) {
+            finishGame('sequence', 3, 20);
+            return;
+        }
+
+        // Next round: double the last
+        const last = gs.seq[gs.seq.length - 1];
+        gs.seq = gs.seq.slice(1).concat([last * 2, last * 4]);
+        gs.next = last * 4;
+        toast('✅ To\'g\'ri', 'success');
+    } else {
+        toast(`❌ Xato. Javob: ${gs.next}`, 'error');
+    }
+    render();
+}
+
+/* --- Typing Game --- */
+function renderTypingGame(gs) {
+    const elapsed = gs.startTime ? Math.floor((now() - gs.startTime) / 1000) : 0;
+    return `
+        <div class="game-message">Quyidagini tez yozing:</div>
+        <div style="font-size:18px;font-weight:800;color:var(--primary);margin:16px 0;padding:16px;background:var(--bg-2);border-radius:12px">
+            ${esc(gs.phrase || '')}
+        </div>
+        <div style="color:var(--text-muted);margin-bottom:12px">⏱ ${elapsed}s</div>
+        <input type="text" class="input" id="typing-input" placeholder="Yozing..." style="max-width:400px" onkeypress="if(event.key==='Enter')checkTyping()">
+        <button class="btn btn-primary" style="margin-top:12px" onclick="checkTyping()">Tasdiqlash</button>
+    `;
+}
+
+function checkTyping() {
+    const input = $('#typing-input')?.value || '';
+    const gs = state.gameState;
+
+    if (input.toLowerCase().trim() === gs.phrase.toLowerCase()) {
+        const elapsed = (now() - gs.startTime) / 1000;
+        const reward = Math.max(10, 30 - Math.floor(elapsed));
+        finishGame('typing', Math.round(elapsed), reward);
+        toast('✅ Ajoyib!', 'success');
+    } else {
+        toast('❌ Xato. Qaytadan urinib ko\'ring', 'error');
+    }
+}
+
+/* --- Quiz Game --- */
+function renderQuizGame(gs) {
+    const q = gs.questions[gs.qIndex];
+    if (!q) return '';
+
+    return `
+        <div style="color:var(--text-muted);margin-bottom:8px">Savol ${gs.qIndex + 1}/${gs.questions.length}</div>
+        <div style="font-size:20px;font-weight:800;margin-bottom:20px">${esc(q.q)}</div>
+        <div style="display:flex;flex-direction:column;gap:8px;width:100%;max-width:400px">
+            ${q.options.map((opt, i) => `
+                <button class="btn btn-ghost" style="width:100%" onclick="answerQuiz(${i})">${esc(opt)}</button>
+            `).join('')}
+        </div>
+    `;
+}
+
+function answerQuiz(i) {
+    const gs = state.gameState;
+    const q = gs.questions[gs.qIndex];
+
+    if (i === q.correct) {
+        gs.score++;
+        toast('✅ To\'g\'ri!', 'success');
+    } else {
+        toast('❌ Xato', 'error');
+    }
+
+    gs.qIndex++;
+
+    if (gs.qIndex >= gs.questions.length) {
+        finishGame('quiz', gs.score, gs.score * 5);
+        return;
+    }
+
+    render();
+}
+
+/* --- Finish Game --- */
+function finishGame(gameId, score, reward) {
+    clearInterval(state.gameTimer);
+
+    state.user.coins = (state.user.coins || 0) + reward;
+    LS.set('user', state.user);
+
+    toast(`🎉 +${reward} UGC yutdingiz!`, 'success', 3000);
+
+    setTimeout(() => {
+        exitGame();
+    }, 2000);
+}
+
+function exitGame() {
+    clearInterval(state.gameTimer);
+    state.activeGame = null;
+    state.gameState = null;
+    render();
+}
+
+/* ============================================================================
+   SECTION 18: LEADERBOARD VIEW
+   ============================================================================ */
+
+function renderLeaderboardView() {
+    const filtered = state.leaderboardFilter === 'all'
+        ? LEADERBOARDS
+        : LEADERBOARDS.filter(lb => lb.id === state.leaderboardFilter);
+
+    return `
+        <div class="page-header">
+            <h1 class="page-title">🏆 Top Reyting</h1>
+            <p class="page-subtitle">13 xil kategoriya</p>
+        </div>
+
+        <div class="tabs" style="margin-bottom:20px;flex-wrap:wrap">
+            <button class="tab ${state.leaderboardFilter === 'all' ? 'active' : ''}" onclick="setLeaderboardFilter('all')">
+                Barchasi
+            </button>
+            ${LEADERBOARDS.map(lb => `
+                <button class="tab ${state.leaderboardFilter === lb.id ? 'active' : ''}" onclick="setLeaderboardFilter('${lb.id}')">
+                    ${lb.icon} ${lb.title.split(' ')[0]}
+                </button>
+            `).join('')}
+        </div>
+
+        <div class="grid-2">
+            ${filtered.map(lb => renderLeaderboardCard(lb)).join('')}
+        </div>
+    `;
+}
+
+function renderLeaderboardCard(lb) {
+    return `
+        <div class="card">
+            <h3 style="font-size:16px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px">
+                <span style="font-size:22px">${lb.icon}</span>
+                ${esc(lb.title)}
+            </h3>
+            ${lb.data.map((item, i) => `
+                <div class="rank-item">
+                    <div class="rank-badge ${i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-default'}">${i + 1}</div>
+                    <div class="rank-avatar">${item.avatar}</div>
+                    <div class="rank-info">
+                        <div class="rank-name">
+                            ${esc(item.name)}
+                            ${item.verified ? '<span class="verified">✔</span>' : ''}
+                        </div>
+                        <div class="rank-value">${esc(item.value)}</div>
+                    </div>
+                    ${i === 0 ? '<div class="rank-crown">👑</div>' : ''}
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function setLeaderboardFilter(f) {
+    state.leaderboardFilter = f;
+    render();
+}
+
+/* ============================================================================
+   SECTION 19: STREAMS VIEW
+   ============================================================================ */
+
+function renderStreamsView() {
+    const streams = LS.get('streams', []);
+
+    return `
+        <div class="page-header">
+            <h1 class="page-title">📺 Jonli efirlar</h1>
+            <p class="page-subtitle">Strimerlar uchun maxsus imkoniyatlar</p>
+        </div>
+
+        <div class="grid-2">
+            ${streams.map(s => `
+                <div class="stream-card" onclick="openStreamModal('${s.id}')">
+                    <div class="stream-thumbnail">
+                        ${esc(s.emoji)}
+                        <div class="live-badge">● LIVE</div>
+                        <div class="viewers-badge">👁 ${fmt(s.viewers)}</div>
+                    </div>
+                    <div class="stream-info">
+                        <div class="stream-title">${esc(s.name)}</div>
+                        <div class="stream-author">@${esc(s.streamer)}</div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+
+        <div class="card" style="margin-top:24px">
+            <h3 style="margin-bottom:12px">🎁 Strimerlar uchun qulayliklar</h3>
+            <div style="display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--text-muted)">
+                <div>✅ Sovg'a yuborish (UGC)</div>
+                <div>✅ Premium strimer badge</div>
+                <div>✅ Ko'p tomoshabin uchun bonus</div>
+                <div>✅ Live chat moderatsiyasi</div>
+                <div>✅ Strimer daromadi 70/30</div>
+            </div>
+        </div>
+    `;
+}
+
+function openStreamModal(id) {
+    const s = LS.get('streams', []).find(x => x.id === id);
+    if (!s) return;
+
+    showModal(`
+        <h3 class="modal-title">${esc(s.emoji)} ${esc(s.name)}</h3>
+        <div style="background:#000;aspect-ratio:16/9;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:80px;color:rgba(255,255,255,0.5);margin-bottom:16px">▶</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <div>
+                <div style="font-weight:700">@${esc(s.streamer)}</div>
+                <div style="font-size:12px;color:var(--text-muted)">${fmt(s.viewers)} tomoshabin</div>
+            </div>
+            <span class="live-badge">● LIVE</span>
+        </div>
+        <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" style="flex:1" onclick="sendGift('${s.id}')">🎁 Sovg'a</button>
+            <button class="btn btn-ghost" style="flex:1" onclick="toast('❤️ Yoqtirdim!', 'success')">❤️</button>
+        </div>
+        <button class="btn btn-ghost btn-block" style="margin-top:12px" onclick="closeModal()">Yopish</button>
+    `);
+}
+
+function sendGift(id) {
+    if ((state.user.coins || 0) < 10) {
+        return toast('❌ Kamida 10 UGC kerak', 'error');
+    }
+    state.user.coins -= 10;
+    LS.set('user', state.user);
+    toast('🎁 Sovg\'a yuborildi!', 'success');
+    render();
+}
+
+/* ============================================================================
+   SECTION 20: SUBSCRIPTIONS VIEW
+   ============================================================================ */
+
+function renderSubscriptionsView() {
+    const plans = [
+        {
+            id: 'free',
+            name: 'Bepul',
+            price: 0,
+            icon: '🆓',
+            features: ['Asosiy lenta', '5 xil AI', 'Reklama bilan', 'Cheklangan o\'yinlar']
+        },
+        {
+            id: 'premium',
+            name: 'Premium',
+            price: 50000,
+            icon: '💎',
+            badge: 'TOP',
+            features: ['Barcha AI (20 xil)', 'Animatsiyali galochka', 'Reklamasiz', 'Trend boost', 'Strimer sovg\'alari', 'Cheksiz o\'yinlar']
+        },
+        {
+            id: 'vip',
+            name: 'VIP Brand',
+            price: 200000,
+            icon: '👑',
+            features: ['Barcha Premium', 'E-commerce 0% komissiya', 'Top reytingda birinchi', 'Shaxsiy menejer', 'Cheksiz AI', 'Gold galochka']
+        }
+    ];
+
+    return `
+        <div class="page-header">
+            <h1 class="page-title">💎 Obunalar</h1>
+            <p class="page-subtitle">Premium imkoniyatlarni oching</p>
+        </div>
+
+        <div class="grid-3">
+            ${plans.map(p => `
+                <div class="plan-card ${p.id}">
+                    ${p.badge ? `<div class="plan-badge">${p.badge}</div>` : ''}
+                    <div class="plan-icon">${p.icon}</div>
+                    <h3 class="plan-name">
+                        ${esc(p.name)}
+                        ${p.id === 'premium' ? '<span class="verified">✔</span>' : ''}
+                        ${p.id === 'vip' ? '<span class="verified-gold">✔</span>' : ''}
+                    </h3>
+                    <div class="plan-price" style="color:${p.id === 'premium' ? 'var(--primary)' : p.id === 'vip' ? 'var(--purple)' : 'var(--text-muted)'}">
+                        ${p.price === 0 ? 'Bepul' : fmt(p.price) + ' <small>UGC</small>'}
+                    </div>
+                    <ul class="plan-features">
+                        ${p.features.map(f => `<li>✅ ${esc(f)}</li>`).join('')}
+                    </ul>
+                    ${p.id === 'free'
+                        ? `<button class="btn btn-ghost btn-block" disabled>Joriy reja</button>`
+                        : `<button class="btn btn-primary btn-block" onclick="buyPlan('${p.id}','${p.name}',${p.price})">Sotib olish</button>`
+                    }
+                </div>
+            `).join('')}
+        </div>
+
+        <div class="card" style="margin-top:24px">
+            <h3 style="margin-bottom:12px">🎁 Animatsiyali galochka</h3>
+            <p style="color:var(--text-muted);font-size:14px;margin-bottom:12px">
+                Premium va VIP obuna bilan profilingizda ko'k animatsiyali galochka paydo bo'ladi:
+            </p>
+            <div style="display:flex;gap:16px;align-items:center;padding:16px;background:var(--bg-3);border-radius:12px;flex-wrap:wrap">
+                <span style="font-size:18px">Foydalanuvchi</span>
+                <span class="verified" style="font-size:20px">✔</span>
+                <span style="font-size:18px">Premium</span>
+                <span class="verified-gold" style="font-size:20px">✔</span>
+                <span style="font-size:18px">VIP</span>
+            </div>
+        </div>
+    `;
+}
+
+function buyPlan(id, name, price) {
+    if ((state.user.coins || 0) < price) {
+        return toast(`❌ ${fmt(price)} UGC kerak. Sizda: ${fmt(state.user.coins || 0)}`, 'error');
+    }
+    state.user.coins -= price;
+    state.user.plan = id;
+    state.user.verified = true;
+    LS.set('user', state.user);
+    toast(`✅ ${name} rejasi faollashtirildi!`, 'success');
+    render();
+}
+
+/* ============================================================================
+   SECTION 21: PROFILE VIEW
+   ============================================================================ */
+
+function renderProfileView() {
+    const posts = LS.get('posts', []).filter(p => p.userId === state.user.id);
+    const totalLikes = posts.reduce((s, p) => s + (p.likes || 0), 0);
+    const orders = LS.get('orders', []);
+
+    return `
+        <div class="profile-hero">
+            <div class="profile-avatar">${esc(state.user.avatar)}</div>
+            <h2 class="profile-name">
+                ${esc(state.user.name)}
+                ${state.user.verified ? '<span class="verified">✔</span>' : ''}
+            </h2>
+            <p class="profile-email">${esc(state.user.email || '')}</p>
+            <div class="profile-plan">
+                Level ${state.user.level || 1} · ${state.user.plan || 'free'}
+            </div>
+
+            <div class="profile-stats">
+                <div class="profile-stat">
+                    <div class="profile-stat-value">${posts.length}</div>
+                    <div class="profile-stat-label">Postlar</div>
+                </div>
+                <div class="profile-stat">
+                    <div class="profile-stat-value">${fmt(totalLikes)}</div>
+                    <div class="profile-stat-label">Layklar</div>
+                </div>
+                <div class="profile-stat">
+                    <div class="profile-stat-value">${fmt(state.user.coins || 0)}</div>
+                    <div class="profile-stat-label">UGC</div>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:8px;margin-top:20px;justify-content:center;flex-wrap:wrap">
+                <button class="btn btn-primary btn-sm" onclick="navigate('subscriptions')">💎 Obuna</button>
+                <button class="btn btn-ghost btn-sm" onclick="navigate('settings')">⚙️ Sozlamalar</button>
+                <button class="btn btn-ghost btn-sm" onclick="showOrders()">📦 Buyurtmalar (${orders.length})</button>
+            </div>
+        </div>
+
+        <h3 style="font-size:16px;font-weight:800;margin-bottom:12px">Mening postlarim</h3>
+        ${posts.length === 0
+            ? renderEmpty('📝', 'Hali postlar yo\'q')
+            : posts.map(p => renderPost(p)).join('')
+        }
+    `;
+}
+
+function showOrders() {
+    const orders = LS.get('orders', []);
+    const products = LS.get('products', []);
+
+    showModal(`
+        <h3 class="modal-title">📦 Buyurtmalarim</h3>
+        ${orders.length === 0
+            ? renderEmpty('📦', 'Hali buyurtmalar yo\'q')
+            : orders.map(o => `
+                <div class="card-flat" style="margin-bottom:12px">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                        <b>Buyurtma #${o.id.slice(-6)}</b>
+                        <span class="badge badge-success">${o.status}</span>
+                    </div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">${timeAgo(o.at)}</div>
+                    ${o.items.map(item => {
+                        const p = products.find(pr => pr.id === item.id);
+                        return p ? `<div style="font-size:13px">· ${p.emoji} ${p.name} × ${item.qty}</div>` : '';
+                    }).join('')}
+                    <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;font-weight:700">
+                        Jami: $${o.total.toFixed(2)}
+                    </div>
+                </div>
+            `).join('')
+        }
+        <button class="btn btn-ghost btn-block" style="margin-top:12px" onclick="closeModal()">Yopish</button>
+    `);
+}
+
+/* ============================================================================
+   SECTION 22: SETTINGS VIEW
+   ============================================================================ */
+
+function renderSettingsView() {
+    return `
+        <div class="page-header">
+            <h1 class="page-title">⚙️ Sozlamalar</h1>
+            <p class="page-subtitle">Ilovani o'zingizga moslang</p>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+            <h3 style="margin-bottom:16px">🎨 Tema</h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn ${state.theme === 'light' ? 'btn-primary' : 'btn-ghost'}" onclick="applyTheme('light');render()">
+                    ☀️ Yorug'
+                </button>
+                <button class="btn ${state.theme === 'dark' ? 'btn-primary' : 'btn-ghost'}" onclick="applyTheme('dark');render()">
+                    🌙 Qorong'i
+                </button>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+            <h3 style="margin-bottom:16px">👤 Profil</h3>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+                <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#00F0FF,#a855f7);display:flex;align-items:center;justify-content:center;font-size:28px">
+                    ${esc(state.user.avatar)}
+                </div>
+                <div>
+                    <div style="font-weight:800">${esc(state.user.name)}</div>
+                    <div style="font-size:12px;color:var(--text-muted)">${esc(state.user.email || '')}</div>
+                </div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="openAvatarPicker()">Avatar o'zgartirish</button>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+            <h3 style="margin-bottom:16px">ℹ️ Ilova haqida</h3>
+            <div style="font-size:13px;color:var(--text-muted);line-height:1.8">
+                <div>Versiya: <b>4.0.0</b></div>
+                <div>Backend: <b>LocalStorage</b></div>
+                <div>User ID: <b>${esc(state.user.id)}</b></div>
+                <div>Ro'yxatdan o'tgan: <b>${new Date(state.user.joined || now()).toLocaleDateString('uz-UZ')}</b></div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+            <h3 style="margin-bottom:16px">🗑️ Xavfli</h3>
+            <button class="btn btn-danger btn-sm" onclick="logout()">Chiqish</button>
+        </div>
+    `;
+}
+
+function openAvatarPicker() {
+    showModal(`
+        <h3 class="modal-title">Avatar tanlang</h3>
+        <div class="grid-4" style="gap:8px">
+            ${AVATARS.map(a => `
+                <button class="game-btn" style="width:100%;height:60px;font-size:28px;background:var(--bg-3);${a === state.user.avatar ? 'border:2px solid var(--primary)' : ''}" onclick="setAvatar('${a}')">
+                    ${a}
+                </button>
+            `).join('')}
+        </div>
+        <button class="btn btn-ghost btn-block" style="margin-top:16px" onclick="closeModal()">Bekor</button>
+    `);
+}
+
+function setAvatar(a) {
+    state.user.avatar = a;
+    LS.set('user', state.user);
+    closeModal();
+    toast('✅ Avatar yangilandi', 'success');
+    render();
+}
+
+function logout() {
+    if (!confirm('Chiqasizmi?')) return;
+    LS.del('user');
+    state.user = null;
+    state.view = 'feed';
+    render();
+}
+
+/* ============================================================================
+   SECTION 23: SEARCH VIEW
+   ============================================================================ */
+
+function renderSearchView() {
+    const q = state.searchQuery.toLowerCase().trim();
+    let results = [];
+
+    if (q) {
+        const posts = LS.get('posts', []);
+        results = posts.filter(p =>
+            p.text.toLowerCase().includes(q) ||
+            (p.tags || []).some(t => ('#' + t).toLowerCase().includes(q))
+        );
+    }
+
+    return `
+        <div style="max-width:760px;margin:0 auto">
+            <div class="search-bar">
+                <button class="btn btn-ghost btn-sm" onclick="state.view='feed';state.searchQuery='';render()">←</button>
+                <input type="text" placeholder="Qidirish..." value="${esc(state.searchQuery)}" oninput="state.searchQuery=this.value;render()" autofocus>
+            </div>
+
+            <h3 style="font-size:16px;font-weight:800;margin-bottom:12px">
+                "${esc(state.searchQuery)}" uchun natijalar
+            </h3>
+
+            ${results.length === 0
+                ? renderEmpty('🔍', 'Hech narsa topilmadi')
+                : results.map(p => renderPost(p)).join('')
+            }
+        </div>
+    `;
+}
+
+/* ============================================================================
+   SECTION 24: MODAL SYSTEM
+   ============================================================================ */
+
+function showModal(html) {
+    const root = $('#modal-root');
+    if (!root) return;
+    root.innerHTML = `
+        <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+            <div class="modal">${html}</div>
+        </div>
+    `;
+}
+
+function closeModal() {
+    const root = $('#modal-root');
+    if (root) root.innerHTML = '';
+}
+
+/* ============================================================================
+   SECTION 25: EMPTY STATE
+   ============================================================================ */
+
+function renderEmpty(icon, text) {
+    return `
+        <div class="empty-state">
+            <div class="empty-icon">${icon}</div>
+            <div class="empty-text">${esc(text)}</div>
+        </div>
+    `;
+}
+
+/* ============================================================================
+   SECTION 26: KEYBOARD SHORTCUTS
+   ============================================================================ */
+
+document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        if (e.key === 'Escape') e.target.blur();
+        return;
+    }
+
+    if (e.key === 'Escape') {
+        closeModal();
+        return;
+    }
+
+    if (!state.user) return;
+
+    // Quick navigation
+    if (e.key === 'g') {
+        state._gPressed = true;
+        setTimeout(() => state._gPressed = false, 800);
+        return;
+    }
+
+    if (state._gPressed) {
+        const routes = {
+            'f': 'feed',
+            't': 'trend',
+            'c': 'crypto',
+            'a': 'ai',
+            'g': 'games',
+            'p': 'profile'
+        };
+        if (routes[e.key]) {
+            navigate(routes[e.key]);
+            state._gPressed = false;
+        }
+    }
+});
+
+/* ============================================================================
+   SECTION 27: BOOT
+   ============================================================================ */
+
+// Start the app
+init();
+
+// Handle initial hash routing (if any)
+if (window.location.hash) {
+    const hash = window.location.hash.slice(1);
+    if (state.user) {
+        const validRoutes = ['feed', 'trend', 'crypto', 'ecommerce', 'ai', 'games', 'leaderboard', 'streams', 'subscriptions', 'profile', 'settings'];
+        if (validRoutes.includes(hash)) {
+            state.view = hash;
+            render();
+        }
+    }
+}
+
+console.log('%c🎯 Unigram v4.0 — tayyor', 'color:#00F0FF;font-size:14px;font-weight:900');
+console.log('%cBarcha funksiyalar ishlaydi', 'color:#10b981;font-size:12px');
+console.log('%cKlaviatura: g+f (lenta), g+c (kripto), g+a (AI), g+g (o\'yinlar)', 'color:#8892a8;font-size:11px');
+
+/* ============================================================================
+   END OF SCRIPT
+   ============================================================================ */
+</script>
+</body>
+</html>
