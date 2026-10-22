@@ -1,6 +1,9 @@
 flask>=3.0.0
 gunicorn
 uvicorn
-
+flask>=3.0.0
+gunicorn
+fastapi
+uvicorn
 
 
