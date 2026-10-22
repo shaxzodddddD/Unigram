@@ -1,7 +1,9 @@
 # ============================================================
-# UNIGRAM — Flask + SQLite, Render-ready
-# Local: python main.py (port 5566)
-# Render: gunicorn main:app --bind 0.0.0.0:$PORT
+# UNIGRAM — Render-ready Flask backend
+# Faqat shu fayl + requirements.txt kerak
+# Ishlatish:
+#   Lokal: python main.py
+#   Render: gunicorn main:app --bind 0.0.0.0:$PORT
 # ============================================================
 import os
 import sqlite3
@@ -11,10 +13,10 @@ import base64
 import re
 import json
 from functools import wraps
-from flask import Flask, request, jsonify, send_from_directory, g, make_response
+from flask import Flask, request, jsonify, send_from_directory, g, Response
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# --- CORS (ixtiyoriy, lekin foydali) ---
+# CORS — ixtiyoriy
 try:
     from flask_cors import CORS
     HAS_CORS = True
@@ -22,43 +24,32 @@ except ImportError:
     HAS_CORS = False
 
 # ============================================================
-# KONFIGURATSIYA (Environment variables)
+# KONFIGURATSIYA
 # ============================================================
-IS_RENDER = os.environ.get('RENDER') == 'true' or os.environ.get('RENDER') == '1'
+IS_RENDER = os.environ.get('RENDER') in ('true', '1', 'yes')
 PORT = int(os.environ.get('PORT', 5566))
 DEBUG = os.environ.get('FLASK_DEBUG', '0') == '1' and not IS_RENDER
-
-# Render'da persistent disk bo'lsa, shu yo'lga yozing
-# Disk mount path: /var/data (Render dashboard'da sozlanadi)
 DATA_DIR = os.environ.get('DATA_DIR', '.')
 
 DB_FILE = os.path.join(DATA_DIR, 'unigram.db')
 UPLOAD_DIR = os.path.join(DATA_DIR, 'uploads')
-
-SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_urlsafe(32))
 ADMIN_SECRET = os.environ.get('ADMIN_SECRET', 'admin123')
-
-# Ruxsat etilgan origin'lar (CORS uchun)
-ALLOWED_ORIGINS = os.environ.get(
-    'ALLOWED_ORIGINS',
-    '*' if not IS_RENDER else os.environ.get('RENDER_EXTERNAL_URL', '*')
-)
+SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_urlsafe(32))
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # ============================================================
-# FLASK APP
+# APP
 # ============================================================
 app = Flask(__name__, static_folder='.', static_url_path='')
 app.config['SECRET_KEY'] = SECRET_KEY
-app.config['MAX_CONTENT_LENGTH'] = 12 * 1024 * 1024  # 12MB
+app.config['MAX_CONTENT_LENGTH'] = 12 * 1024 * 1024
 app.config['JSON_AS_ASCII'] = False
 app.config['JSON_SORT_KEYS'] = False
 
 if HAS_CORS:
-    CORS(app, origins=ALLOWED_ORIGINS, supports_credentials=True,
+    CORS(app, origins='*', supports_credentials=True,
          allow_headers=['Content-Type', 'Authorization'])
-    print(f'✅ CORS enabled for: {ALLOWED_ORIGINS}')
 
 # ============================================================
 # YORDAMCHILAR
@@ -89,7 +80,6 @@ CREATE TABLE IF NOT EXISTS users (
     bio TEXT DEFAULT '',
     verified INTEGER DEFAULT 0,
     is_private INTEGER DEFAULT 0,
-    verified_requested INTEGER DEFAULT 0,
     last_seen INTEGER,
     created_at INTEGER NOT NULL
 );
@@ -109,8 +99,6 @@ CREATE TABLE IF NOT EXISTS posts (
     type TEXT DEFAULT 'post',
     text TEXT DEFAULT '',
     image_url TEXT,
-    location TEXT,
-    audio_id INTEGER,
     tags TEXT DEFAULT '',
     pinned INTEGER DEFAULT 0,
     archived INTEGER DEFAULT 0,
@@ -118,14 +106,12 @@ CREATE TABLE IF NOT EXISTS posts (
     created_at INTEGER NOT NULL,
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-CREATE INDEX IF NOT EXISTS idx_posts_type ON posts(type, archived, created_at);
 CREATE INDEX IF NOT EXISTS idx_posts_user ON posts(user_id, archived);
 
 CREATE TABLE IF NOT EXISTS comments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     post_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
-    parent_id INTEGER,
     text TEXT NOT NULL,
     created_at INTEGER NOT NULL,
     FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE CASCADE,
@@ -162,55 +148,6 @@ CREATE TABLE IF NOT EXISTS follows (
     FOREIGN KEY(follower_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY(following_id) REFERENCES users(id) ON DELETE CASCADE
 );
-CREATE INDEX IF NOT EXISTS idx_follows_follower ON follows(follower_id);
-CREATE INDEX IF NOT EXISTS idx_follows_following ON follows(following_id);
-
-CREATE TABLE IF NOT EXISTS follow_requests (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    from_id INTEGER NOT NULL,
-    to_id INTEGER NOT NULL,
-    created_at INTEGER NOT NULL,
-    UNIQUE(from_id, to_id),
-    FOREIGN KEY(from_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY(to_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS close_friends (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    friend_id INTEGER NOT NULL,
-    UNIQUE(user_id, friend_id),
-    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY(friend_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS blocks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    blocker_id INTEGER NOT NULL,
-    blocked_id INTEGER NOT NULL,
-    created_at INTEGER NOT NULL,
-    UNIQUE(blocker_id, blocked_id),
-    FOREIGN KEY(blocker_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY(blocked_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS reports (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    reporter_id INTEGER NOT NULL,
-    target_type TEXT NOT NULL,
-    target_id INTEGER NOT NULL,
-    reason TEXT,
-    status TEXT DEFAULT 'pending',
-    created_at INTEGER NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS hashtag_follows (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    hashtag TEXT NOT NULL,
-    UNIQUE(user_id, hashtag),
-    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-);
 
 CREATE TABLE IF NOT EXISTS groups_t (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -243,10 +180,7 @@ CREATE TABLE IF NOT EXISTS messages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     chat_id INTEGER NOT NULL,
     sender_id INTEGER NOT NULL,
-    text TEXT DEFAULT '',
-    type TEXT DEFAULT 'text',
-    media_url TEXT,
-    reply_to_id INTEGER,
+    text TEXT NOT NULL,
     read_at INTEGER,
     created_at INTEGER NOT NULL,
     FOREIGN KEY(chat_id) REFERENCES chats(id) ON DELETE CASCADE
@@ -270,8 +204,6 @@ CREATE TABLE IF NOT EXISTS stories (
     emoji TEXT DEFAULT '✨',
     text TEXT DEFAULT '',
     image_url TEXT,
-    audience TEXT DEFAULT 'public',
-    stickers TEXT,
     created_at INTEGER NOT NULL,
     expires_at INTEGER NOT NULL,
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -297,7 +229,7 @@ CREATE TABLE IF NOT EXISTS notifications (
     created_at INTEGER NOT NULL,
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-CREATE INDEX IF NOT EXISTS idx_notif_user ON notifications(user_id, read, created_at);
+CREATE INDEX IF NOT EXISTS idx_notif_user ON notifications(user_id, read);
 """
 
 def seed():
@@ -306,71 +238,65 @@ def seed():
             return
         t = now_ms()
         ph = generate_password_hash('demo123')
-
         demo = [
-            ('Dilnoza Karimova',   '🌻', 'UI/UX dizayner · 5 yil tajriba', 1),
-            ('Javlon Toshmatov',   '🚀', 'Startap asoschisi · EdTech',     1),
-            ('Malika Yusupova',    '🦋', 'Fotograf · sayyoh',              0),
-            ('Bekzod Rahimov',     '🐺', 'Backend dasturchi · Python',     1),
-            ('Sevinch Aliyeva',    '🌙', 'Kitob klubi asoschisi',          0),
-            ('Nodira Ismoilova',   '🌻', 'Marketolog · SMM',               0),
-            ('Aziz Sobirov',       '⚡', 'Frontend · React/Vue',           1),
-            ('Kamola Nazarova',    '🐨', 'Ingliz tili o‘qituvchisi',       0),
+            ('Dilnoza Karimova',   '🌻', 'UI/UX dizayner', 1),
+            ('Javlon Toshmatov',   '🚀', 'Startap asoschisi', 1),
+            ('Malika Yusupova',    '🦋', 'Fotograf', 0),
+            ('Bekzod Rahimov',     '🐺', 'Backend dasturchi', 1),
+            ('Sevinch Aliyeva',    '🌙', 'Kitob klubi', 0),
+            ('Nodira Ismoilova',   '🌻', 'Marketolog', 0),
+            ('Aziz Sobirov',       '⚡', 'Frontend', 1),
+            ('Kamola Nazarova',    '🐨', 'Ingliz tili', 0),
         ]
         for name, av, bio, v in demo:
             c.execute('''INSERT INTO users(name,password_hash,avatar,bio,verified,created_at,last_seen)
                          VALUES(?,?,?,?,?,?,?)''', (name, ph, av, bio, v, t, t))
 
-        groups = [
-            ('Dizaynerlar',        '🎨', 'UI/UX, grafik va illyustratsiya'),
-            ('Startapchilar',      '🚀', 'G‘oya → MVP → bozor'),
-            ('Toshkent Tanishlar', '📍', 'Shahardagi tadbirlar'),
-            ('Kitobxonlar',        '📚', 'Har hafta bitta kitob'),
-            ('Dasturchilar',       '💻', 'Kod, savol-javob, freelance'),
-            ('Fotografiya',        '📷', 'Suratlar, texnika, sirlar'),
-        ]
-        for name, em, desc in groups:
+        for name, em, desc in [
+            ('Dizaynerlar', '🎨', 'UI/UX va grafik'),
+            ('Startapchilar', '🚀', 'G\'oya → MVP → bozor'),
+            ('Toshkent', '📍', 'Shahar yangiliklari'),
+            ('Kitobxonlar', '📚', 'Kitob muhokamasi'),
+            ('Dasturchilar', '💻', 'Kod va savol-javob'),
+        ]:
             c.execute('INSERT INTO groups_t(name,emoji,description,created_by,created_at) VALUES(?,?,?,1,?)',
                       (name, em, desc, t))
 
-        items = [
-            ('Noutbuk Lenovo IdeaPad', 4200000, '8GB RAM, 512GB SSD', '💻', 7),
-            ('Grafik planşet Wacom',   850000,  'Dizaynerlar uchun',   '🎨', 1),
-            ('Velosiped Trek',         1900000, '21 tezlik',          '🚲', 2),
-            ('Ingliz tili darslari',   300000,  'IELTS 7.5',          '📘', 8),
-            ('Kofe apparati',          2100000, 'DeLonghi, 2 oy',     '☕', 4),
-        ]
-        for title, price, desc, em, seller in items:
+        for title, price, desc, em, seller in [
+            ('iPhone 15 Pro', 999, '256GB Titanium', '📱', 7),
+            ('MacBook Pro M3', 1999, '14", 16GB', '💻', 2),
+            ('AirPods Max', 549, 'Space Gray', '🎧', 4),
+        ]:
             c.execute('INSERT INTO market(title,price,description,emoji,user_id,created_at) VALUES(?,?,?,?,?,?)',
                       (title, price, desc, em, seller, t))
 
-        posts_data = [
+        for uid, ptype, text, tags in [
             (1, 'post', "Unigram'ga xush kelibsiz! 🎉", 'unigram,yangilik'),
-            (2, 'post', "Bepul dizayn darslari. Kim qatnashmoqchi? 👇", 'dizayn,talim'),
-            (3, 'reel', "Bugungi kod yozish marafoni 🚀", 'dasturlash,reel'),
-            (5, 'post', "Kitob almashish klubi ochdik 📚", 'kitob,tadbirlar'),
-            (4, 'post', "Python o'rganmoqchi bo'lganlar yozing.", 'dasturlash,talim'),
-            (7, 'reel', "React tutorial qisqa video 🎬", 'react,dasturlash'),
-        ]
-        for uid, ptype, text, tags in posts_data:
+            (2, 'post', "Dizayn darslari — kim qatnashadi?", 'dizayn,talim'),
+            (3, 'reel', "Kod yozish marafoni 🚀", 'dasturlash'),
+            (5, 'post', "Kitob almashish klubi 📚", 'kitob'),
+        ]:
             c.execute('INSERT INTO posts(user_id,type,text,tags,created_at) VALUES(?,?,?,?,?)',
                       (uid, ptype, text, tags, t - 3600000))
 
-        for a, b in [(1,2),(1,3),(2,3),(3,1),(4,1),(5,2),(6,3),(7,1)]:
+        for a, b in [(1,2),(1,3),(2,3),(3,1),(4,1)]:
             c.execute('INSERT OR IGNORE INTO follows(follower_id,following_id,created_at) VALUES(?,?,?)',
                       (a, b, t))
 
-        for uid, em, text in [(1, '🌅', 'Ertalabki Toshkent'), (2, '💻', 'Yangi loyiha'), (5, '📚', 'Bugungi kitob')]:
-            c.execute('INSERT INTO stories(user_id,emoji,text,audience,created_at,expires_at) VALUES(?,?,?,?,?,?)',
-                      (uid, em, text, 'public', t - 1800000, t + 22*3600000))
+        for uid, em, text in [(1, '🌅', 'Ertalabki Toshkent'), (2, '💻', 'Yangi loyiha')]:
+            c.execute('INSERT INTO stories(user_id,emoji,text,created_at,expires_at) VALUES(?,?,?,?,?)',
+                      (uid, em, text, t - 3600000, t + 23 * 3600000))
 
-        print('✅ Seed data yaratildi')
+        print('✅ Demo data yaratildi')
 
 def init_db():
-    with db() as c:
-        c.executescript(SCHEMA)
-    seed()
-    print(f'✅ Baza tayyor: {DB_FILE}')
+    try:
+        with db() as c:
+            c.executescript(SCHEMA)
+        seed()
+        print(f'✅ Baza tayyor: {DB_FILE}')
+    except Exception as e:
+        print(f'❌ Baza xatosi: {e}')
 
 # ============================================================
 # AUTH
@@ -381,19 +307,15 @@ def auth(f):
         hdr = request.headers.get('Authorization', '')
         token = hdr.replace('Bearer ', '').strip()
         if not token:
-            return jsonify({'error': 'Token kerak', 'code': 'no_token'}), 401
+            return jsonify({'error': 'Token kerak'}), 401
         with db() as c:
             row = c.execute('''SELECT u.* FROM users u
                 JOIN api_tokens t ON t.user_id = u.id
                 WHERE t.token = ?''', (token,)).fetchone()
         if not row:
-            return jsonify({'error': 'Token yaroqsiz', 'code': 'bad_token'}), 401
+            return jsonify({'error': 'Token yaroqsiz'}), 401
         g.user = dict(row)
         g.token = token
-        # last_seen update
-        if now_ms() - (g.user.get('last_seen') or 0) > 5 * 60000:
-            with db() as c:
-                c.execute('UPDATE users SET last_seen=? WHERE id=?', (now_ms(), g.user['id']))
         return f(*args, **kwargs)
     return wrapper
 
@@ -424,8 +346,7 @@ def save_image(b64_data, prefix='img'):
         with open(os.path.join(UPLOAD_DIR, fname), 'wb') as f:
             f.write(raw)
         return '/uploads/' + fname
-    except Exception as e:
-        print(f'Image save error: {e}')
+    except Exception:
         return None
 
 def notify(user_id, actor_id, kind, text, ref_id=None):
@@ -450,7 +371,7 @@ def post_dict(p, me_id):
 
     return {
         'id': p['id'],
-        'type': p['type'] if 'type' in p.keys() else 'post',
+        'type': p['type'],
         'authorId': p['user_id'],
         'authorName': author['name'] if author else 'Deleted',
         'avatar': author['avatar'] if author else '⭐',
@@ -465,15 +386,9 @@ def post_dict(p, me_id):
         'reactions': {r['emoji']: r['n'] for r in re_rows},
         'saved': my_sv is not None,
         'comments': [
-            {
-                'id': x['id'],
-                'authorId': x['user_id'],
-                'author': x['name'],
-                'avatar': x['avatar'],
-                'verified': bool(x['verified']),
-                'text': x['text'],
-                'at': x['created_at'],
-            } for x in cmts
+            {'id': x['id'], 'authorId': x['user_id'], 'author': x['name'],
+             'avatar': x['avatar'], 'verified': bool(x['verified']),
+             'text': x['text'], 'at': x['created_at']} for x in cmts
         ],
         'commentCount': len(cmts)
     }
@@ -491,11 +406,8 @@ def user_brief(r, me_id):
     return {
         'id': r['id'], 'name': r['name'], 'avatar': r['avatar'],
         'bio': r['bio'], 'verified': bool(r['verified']),
-        'isPrivate': bool(r['is_private']) if 'is_private' in r.keys() else False,
-        'following': following,
-        'followers': followers, 'followingCount': following_count,
-        'postsCount': posts_count,
-        'lastSeen': r['last_seen'] if 'last_seen' in r.keys() else None
+        'following': following, 'followers': followers,
+        'followingCount': following_count, 'postsCount': posts_count,
     }
 
 def ai_reply(text):
@@ -508,10 +420,6 @@ def ai_reply(text):
         return 'Guruhlar bo‘limida jamoa toping 👥'
     if 'bozor' in t or 'narx' in t:
         return 'Bozor bo‘limida e’lon joylashingiz mumkin 🛍️'
-    if 'reel' in t:
-        return 'Reels — qisqa videolar bo‘limi 🎬'
-    if 'story' in t:
-        return 'Story 24 soatdan keyin o‘chadi 📸'
     if 'rahmat' in t:
         return 'Arzimaydi! 😊'
     if '?' in t:
@@ -539,7 +447,7 @@ def maybe_auto_reply(chat_id, me_id):
                           (chat_id, other, ai_reply(last['text']), now_ms()))
 
 # ============================================================
-# HEALTH CHECK (Render uchun MUHIM!)
+# HEALTH CHECK (Render uchun MAJBURIY)
 # ============================================================
 @app.get('/health')
 @app.get('/api/health')
@@ -550,15 +458,15 @@ def health():
         return jsonify({
             'ok': True,
             'time': now_ms(),
-            'version': '4.0',
             'render': IS_RENDER,
-            'db': 'ok'
+            'db': 'ok',
+            'version': '4.0'
         }), 200
     except Exception as e:
         return jsonify({'ok': False, 'error': str(e)}), 500
 
 # ============================================================
-# AUTH API
+# AUTH
 # ============================================================
 @app.post('/api/auth/register')
 def api_register():
@@ -567,14 +475,12 @@ def api_register():
     pwd = d.get('password') or ''
     av = (d.get('avatar') or '⭐').strip()[:4]
     if len(name) < 2:
-        return jsonify({'error': 'Ism kamida 2 belgi', 'code': 'name_short'}), 400
-    if len(name) > 30:
-        return jsonify({'error': 'Ism 30 belgidan oshmasin', 'code': 'name_long'}), 400
+        return jsonify({'error': 'Ism kamida 2 belgi'}), 400
     if len(pwd) < 4:
-        return jsonify({'error': 'Parol kamida 4 belgi', 'code': 'pwd_short'}), 400
+        return jsonify({'error': 'Parol kamida 4 belgi'}), 400
     with db() as c:
         if c.execute('SELECT 1 FROM users WHERE name=?', (name,)).fetchone():
-            return jsonify({'error': 'Bu ism band', 'code': 'name_taken'}), 409
+            return jsonify({'error': 'Bu ism band'}), 409
         c.execute('INSERT INTO users(name,password_hash,avatar,created_at,last_seen) VALUES(?,?,?,?,?)',
                   (name, generate_password_hash(pwd), av, now_ms(), now_ms()))
         uid = c.execute('SELECT last_insert_rowid()').fetchone()[0]
@@ -590,11 +496,11 @@ def api_login():
     name = (d.get('name') or '').strip()
     pwd = d.get('password') or ''
     if not name or not pwd:
-        return jsonify({'error': 'Ism va parol kerak', 'code': 'missing'}), 400
+        return jsonify({'error': 'Ism va parol kerak'}), 400
     with db() as c:
         u = c.execute('SELECT * FROM users WHERE name=?', (name,)).fetchone()
         if not u or not check_password_hash(u['password_hash'], pwd):
-            return jsonify({'error': 'Ism yoki parol xato', 'code': 'invalid_creds'}), 401
+            return jsonify({'error': 'Ism yoki parol xato'}), 401
         token = secrets.token_urlsafe(32)
         c.execute('INSERT INTO api_tokens(user_id,token,created_at) VALUES(?,?,?)',
                   (u['id'], token, now_ms()))
@@ -987,7 +893,7 @@ def api_get_messages(cid):
                   (now_ms(), cid, me))
     return jsonify([{'id': r['id'], 'from': 'me' if r['sender_id'] == me else 'them',
                      'text': r['text'], 'at': r['created_at'],
-                     'read': bool(r['read_at']) if 'read_at' in r.keys() else False} for r in rows])
+                     'read': bool(r['read_at'])} for r in rows])
 
 @app.post('/api/chats/<int:cid>/messages')
 @auth
@@ -1134,10 +1040,8 @@ def api_admin_users():
     if not admin_check():
         return jsonify({'error': 'admin kalit kerak'}), 403
     with db() as c:
-        rows = c.execute('''SELECT id, name, avatar, bio, verified,
-            created_at, last_seen,
-            (SELECT COUNT(*) FROM posts WHERE user_id=users.id) as posts,
-            (SELECT COUNT(*) FROM api_tokens WHERE user_id=users.id) as sessions
+        rows = c.execute('''SELECT id, name, avatar, bio, verified, created_at, last_seen,
+            (SELECT COUNT(*) FROM posts WHERE user_id=users.id) as posts
             FROM users ORDER BY created_at DESC''').fetchall()
     return jsonify([dict(r) for r in rows])
 
@@ -1150,27 +1054,35 @@ def api_admin_stats():
             for k, t in [
                 ('users', 'users'), ('posts', 'posts'), ('comments', 'comments'),
                 ('reactions', 'reactions'), ('chats', 'chats'), ('messages', 'messages'),
-                ('stories', 'stories'), ('market', 'market'), ('sessions', 'api_tokens')
+                ('stories', 'stories'), ('market', 'market')
             ]})
 
 # ============================================================
-# STATIC FILES
+# STATIC FILES (index.html)
 # ============================================================
 @app.get('/')
 @app.get('/index.html')
 def index():
-    return send_from_directory('.', 'index.html')
+    # index.html disk'da bo'lsa — xizmat qiladi
+    if os.path.exists('index.html'):
+        return send_from_directory('.', 'index.html')
+    # Aks holda — zaxira sahifa
+    return Response(FALLBACK_HTML, mimetype='text/html')
 
 @app.get('/uploads/<path:filename>')
 def uploads(filename):
     return send_from_directory(UPLOAD_DIR, filename)
 
-# SPA fallback
+# ============================================================
+# 404 / 413 / 500
+# ============================================================
 @app.errorhandler(404)
 def not_found(e):
     if request.path.startswith('/api/'):
         return jsonify({'error': 'topilmadi'}), 404
-    return send_from_directory('.', 'index.html')
+    if os.path.exists('index.html'):
+        return send_from_directory('.', 'index.html')
+    return Response(FALLBACK_HTML, mimetype='text/html')
 
 @app.errorhandler(413)
 def too_large(e):
@@ -1181,10 +1093,100 @@ def server_error(e):
     return jsonify({'error': 'server xatosi', 'detail': str(e)}), 500
 
 # ============================================================
-# ISHGA TUSHIRISH
+# FALLBACK HTML (agar index.html bo'lmasa)
+# ============================================================
+FALLBACK_HTML = '''<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Unigram — API ishlayapti ✅</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0a0e1a;color:#f1f5f9;
+min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+background:radial-gradient(900px 500px at 10% -10%,rgba(0,240,255,.15),transparent 60%),
+radial-gradient(700px 400px at 100% 0%,rgba(168,85,247,.15),transparent 60%),#0a0e1a}
+.card{background:#131826;border:1px solid rgba(255,255,255,.08);border-radius:24px;
+padding:40px 32px;max-width:520px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.logo{width:88px;height:88px;margin:0 auto 20px;background:rgba(0,240,255,.06);
+border:1px solid rgba(0,240,255,.3);border-radius:22px;display:flex;align-items:center;
+justify-content:center;box-shadow:0 0 30px rgba(0,240,255,.2)}
+.logo svg{width:56px;height:56px;color:#00F0FF;filter:drop-shadow(0 0 12px rgba(0,240,255,.6))}
+h1{font-size:32px;font-weight:900;margin-bottom:6px;letter-spacing:-1px;
+background:linear-gradient(135deg,#00F0FF,#a855f7);-webkit-background-clip:text;
+background-clip:text;color:transparent}
+.sub{color:#8892a8;font-size:14px;margin-bottom:28px}
+.status{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;
+background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:#10b981;
+border-radius:99px;font-weight:700;font-size:14px;margin-bottom:28px}
+.status::before{content:'';width:8px;height:8px;background:#10b981;border-radius:50%;
+animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.info{background:#1e2436;border-radius:14px;padding:20px;text-align:left;font-size:14px;
+line-height:1.9;color:#8892a8;margin-bottom:20px}
+.info b{color:#f1f5f9}
+.info code{background:#0a0e1a;color:#00F0FF;padding:2px 8px;border-radius:6px;
+font-family:ui-monospace,monospace;font-size:12px}
+.links{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.link{display:flex;align-items:center;gap:10px;padding:12px 16px;background:#1e2436;
+border:1px solid rgba(255,255,255,.08);border-radius:12px;color:#f1f5f9;
+text-decoration:none;font-weight:600;font-size:14px;transition:.2s}
+.link:hover{background:#2a3048;border-color:rgba(0,240,255,.3)}
+.link .arr{margin-left:auto;color:#8892a8}
+.note{margin-top:24px;padding:12px;background:rgba(251,191,36,.1);
+border:1px solid rgba(251,191,36,.3);border-radius:12px;color:#fbbf24;
+font-size:13px;line-height:1.6;text-align:left}
+</style>
+</head>
+<body>
+<div class="card">
+    <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+            <path d="M8 9v3.5a3.5 3.5 0 0 0 7 0V9"/>
+            <circle cx="10" cy="13" r="0.75" fill="currentColor"/>
+            <circle cx="12" cy="13" r="0.75" fill="currentColor"/>
+            <circle cx="14" cy="13" r="0.75" fill="currentColor"/>
+        </svg>
+    </div>
+    <h1>Unigram</h1>
+    <p class="sub">Backend muvaffaqiyatli ishga tushdi</p>
+    <div class="status">Server ishlayapti</div>
+
+    <div class="info">
+        <div>📡 <b>API</b>: <code>/api/*</code></div>
+        <div>🏥 <b>Health</b>: <code>/health</code></div>
+        <div>👤 <b>Demo login</b>: <code>Dilnoza Karimova</code> / <code>demo123</code></div>
+    </div>
+
+    <div class="links">
+        <a href="/health" class="link" target="_blank">
+            🏥 Health check <span class="arr">→</span>
+        </a>
+        <a href="/api/admin/stats?key=admin123" class="link" target="_blank">
+            📊 Admin statistika <span class="arr">→</span>
+        </a>
+        <a href="/api/admin/users?key=admin123" class="link" target="_blank">
+            👥 Foydalanuvchilar <span class="arr">→</span>
+        </a>
+    </div>
+
+    <div class="note">
+        ⚠️ <b>index.html topilmadi.</b> To'liq interfeys uchun <code>index.html</code> faylini <code>main.py</code> yoniga qo'ying va qayta deploy qiling.
+    </div>
+</div>
+</body>
+</html>'''
+
+# ============================================================
+# INIT — Render import vaqtida ham ishlaydi
 # ============================================================
 init_db()
 
+# ============================================================
+# ISHGA TUSHIRISH
+# ============================================================
 if __name__ == '__main__':
     print()
     print('=' * 62)
@@ -1192,12 +1194,12 @@ if __name__ == '__main__':
     print('=' * 62)
     print(f'  🌐  http://localhost:{PORT}')
     print(f'  🏥  Health: http://localhost:{PORT}/health')
+    print(f'  🔧  Render: {IS_RENDER}')
     print(f'  📂  Baza: {os.path.abspath(DB_FILE)}')
     print(f'  🖼️   Uploads: {os.path.abspath(UPLOAD_DIR)}')
-    print(f'  🔧  Render: {IS_RENDER}')
-    print(f'  🐛  Debug: {DEBUG}')
+    print(f'  📄  index.html: {"bor" if os.path.exists("index.html") else "YO\'Q (fallback sahifa)"}')
     print()
-    print('  Demo userlar (parol: demo123):')
+    print('  Demo user (parol: demo123):')
     print('    · Dilnoza Karimova · Javlon Toshmatov · Bekzod Rahimov')
     print()
     print('  To‘xtatish: Ctrl+C')
