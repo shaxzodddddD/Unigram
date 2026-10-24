@@ -1,6 +1,6 @@
 # ============================================================================
-# UNIGRAM — Render uchun 100% ishlaydigan backend
-# Ham uvicorn (ASGI), ham gunicorn (WSGI) bilan ishlaydi
+# UNIGRAM — Render uchun 100% ishlaydigan Flask + ASGI backend
+# Ham uvicorn, ham gunicorn bilan ishlaydi
 # ============================================================================
 import os
 import sys
@@ -9,27 +9,21 @@ import time
 import secrets
 import base64
 import re
-import json
 from functools import wraps
 from flask import Flask, request, jsonify, send_from_directory, g
-
-# Werkzeug password hashing
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# CORS
 try:
     from flask_cors import CORS
     HAS_CORS = True
 except ImportError:
     HAS_CORS = False
 
-# ASGI wrapper — uvicorn uchun MAJBURIY
 try:
     from asgiref.wsgi import WsgiToAsgi
     HAS_ASGI = True
 except ImportError:
     HAS_ASGI = False
-
 
 # ============================================================================
 # CONFIG
@@ -44,17 +38,17 @@ IS_RENDER = os.environ.get("RENDER") == "true"
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-print("=" * 62)
-print("  🚀 UNIGRAM ishga tushirilmoqda")
-print("=" * 62)
+# Startup log
+print("=" * 60)
+print("  UNIGRAM ishga tushirilmoqda")
+print("=" * 60)
 print(f"  Port: {PORT}")
 print(f"  Render: {IS_RENDER}")
 print(f"  Python: {sys.version.split()[0]}")
 print(f"  DB: {os.path.abspath(DB_FILE)}")
-print(f"  ASGI: {'✅ bor' if HAS_ASGI else '❌ yo\'q'}")
-print(f"  CORS: {'✅ bor' if HAS_CORS else '⚠️ yo\\'q'}")
-print("=" * 62)
-
+print(f"  ASGI: {HAS_ASGI}")
+print(f"  CORS: {HAS_CORS}")
+print("=" * 60)
 
 # ============================================================================
 # FLASK APP
@@ -62,12 +56,10 @@ print("=" * 62)
 flask_app = Flask(__name__, static_folder=".", static_url_path="")
 flask_app.config["MAX_CONTENT_LENGTH"] = 12 * 1024 * 1024
 flask_app.config["JSON_AS_ASCII"] = False
-flask_app.config["JSON_SORT_KEYS"] = False
 
 if HAS_CORS:
     CORS(flask_app, origins="*", supports_credentials=True,
          allow_headers=["Content-Type", "Authorization"])
-
 
 # ============================================================================
 # HELPERS
@@ -86,7 +78,6 @@ def get_db():
 
 
 def run_sql(sql, params=(), fetch=None):
-    """SQL bajarish."""
     conn = get_db()
     try:
         cur = conn.execute(sql, params)
@@ -100,31 +91,15 @@ def run_sql(sql, params=(), fetch=None):
         conn.close()
 
 
-def run_tx(queries):
-    """Tranzaksiya."""
-    conn = get_db()
-    try:
-        for sql, params in queries:
-            conn.execute(sql, params)
-        conn.commit()
-        return True
-    except Exception as e:
-        conn.rollback()
-        print(f"❌ TX error: {e}")
-        return False
-    finally:
-        conn.close()
-
-
 # ============================================================================
-# DATABASE SCHEMA
+# SCHEMA
 # ============================================================================
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
-    avatar TEXT DEFAULT '⭐',
+    avatar TEXT DEFAULT 'star',
     bio TEXT DEFAULT '',
     verified INTEGER DEFAULT 0,
     last_seen INTEGER,
@@ -135,22 +110,18 @@ CREATE TABLE IF NOT EXISTS api_tokens (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     token TEXT UNIQUE NOT NULL,
-    created_at INTEGER NOT NULL,
-    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+    created_at INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_token ON api_tokens(token);
 
 CREATE TABLE IF NOT EXISTS posts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
-    type TEXT DEFAULT 'post',
     text TEXT DEFAULT '',
     image_url TEXT,
     tags TEXT DEFAULT '',
-    views INTEGER DEFAULT 0,
     created_at INTEGER NOT NULL,
-    deleted_at INTEGER,
-    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+    deleted_at INTEGER
 );
 CREATE INDEX IF NOT EXISTS idx_post_created ON posts(created_at);
 
@@ -160,9 +131,7 @@ CREATE TABLE IF NOT EXISTS comments (
     user_id INTEGER NOT NULL,
     text TEXT NOT NULL,
     created_at INTEGER NOT NULL,
-    deleted_at INTEGER,
-    FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE CASCADE,
-    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+    deleted_at INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS reactions (
@@ -171,8 +140,7 @@ CREATE TABLE IF NOT EXISTS reactions (
     user_id INTEGER NOT NULL,
     emoji TEXT NOT NULL,
     created_at INTEGER NOT NULL,
-    UNIQUE(post_id, user_id),
-    FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE CASCADE
+    UNIQUE(post_id, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS saves (
@@ -180,8 +148,7 @@ CREATE TABLE IF NOT EXISTS saves (
     post_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
     created_at INTEGER NOT NULL,
-    UNIQUE(post_id, user_id),
-    FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE CASCADE
+    UNIQUE(post_id, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS follows (
@@ -192,18 +159,10 @@ CREATE TABLE IF NOT EXISTS follows (
     UNIQUE(follower_id, following_id)
 );
 
-CREATE TABLE IF NOT EXISTS blocks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    blocker_id INTEGER NOT NULL,
-    blocked_id INTEGER NOT NULL,
-    created_at INTEGER NOT NULL,
-    UNIQUE(blocker_id, blocked_id)
-);
-
 CREATE TABLE IF NOT EXISTS groups_t (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    emoji TEXT DEFAULT '👥',
+    emoji TEXT DEFAULT 'grp',
     description TEXT DEFAULT '',
     created_at INTEGER NOT NULL
 );
@@ -232,14 +191,13 @@ CREATE TABLE IF NOT EXISTS messages (
     read_at INTEGER,
     created_at INTEGER NOT NULL
 );
-CREATE INDEX IF NOT EXISTS idx_msg_chat ON messages(chat_id);
 
 CREATE TABLE IF NOT EXISTS market (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     price INTEGER DEFAULT 0,
     description TEXT DEFAULT '',
-    emoji TEXT DEFAULT '📦',
+    emoji TEXT DEFAULT 'box',
     user_id INTEGER NOT NULL,
     created_at INTEGER NOT NULL
 );
@@ -247,7 +205,7 @@ CREATE TABLE IF NOT EXISTS market (
 CREATE TABLE IF NOT EXISTS stories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
-    emoji TEXT DEFAULT '✨',
+    emoji TEXT DEFAULT 'star',
     text TEXT DEFAULT '',
     image_url TEXT,
     created_at INTEGER NOT NULL,
@@ -271,22 +229,18 @@ CREATE TABLE IF NOT EXISTS notifications (
     read INTEGER DEFAULT 0,
     created_at INTEGER NOT NULL
 );
-CREATE INDEX IF NOT EXISTS idx_notif ON notifications(user_id, read);
 """
 
 
-# ============================================================================
-# INIT DB
-# ============================================================================
 def init_db():
-    print("🔧 Baza yaratilmoqda...")
+    print("Baza yaratilmoqda...")
     conn = get_db()
     try:
         conn.executescript(SCHEMA)
         conn.commit()
-        print("✅ Schema tayyor")
+        print("Schema tayyor")
     except Exception as e:
-        print(f"❌ Schema xatosi: {e}")
+        print(f"Schema xatosi: {e}")
         raise
     finally:
         conn.close()
@@ -296,42 +250,41 @@ def seed_db():
     try:
         count = run_sql("SELECT COUNT(*) FROM users", fetch="one")[0]
         if count > 0:
-            print(f"ℹ️ Baza tayyor ({count} user)")
+            print(f"Baza tayyor ({count} user)")
             return
 
-        print("🌱 Demo data...")
+        print("Demo data yaratilmoqda...")
         t = now_ms()
         pwd = generate_password_hash("demo123")
 
         users = [
-            ("Dilnoza Karimova", "🌻", "UI/UX dizayner · 5 yil", 1),
-            ("Javlon Toshmatov", "🚀", "Startap asoschisi", 1),
-            ("Malika Yusupova", "🦋", "Fotograf · sayyoh", 0),
-            ("Bekzod Rahimov", "🐺", "Backend dasturchi", 1),
-            ("Sevinch Aliyeva", "🌙", "Kitob klubi", 0),
-            ("Nodira Ismoilova", "🌻", "Marketolog", 0),
-            ("Aziz Sobirov", "⚡", "Frontend dev", 1),
-            ("Kamola Nazarova", "🐨", "Ingliz tili", 0),
+            ("Dilnoza Karimova", "flower", "UI/UX dizayner", 1),
+            ("Javlon Toshmatov", "rocket", "Startap asoschisi", 1),
+            ("Malika Yusupova", "butterfly", "Fotograf", 0),
+            ("Bekzod Rahimov", "wolf", "Backend dasturchi", 1),
+            ("Sevinch Aliyeva", "moon", "Kitob klubi", 0),
+            ("Nodira Ismoilova", "flower", "Marketolog", 0),
+            ("Aziz Sobirov", "bolt", "Frontend dev", 1),
+            ("Kamola Nazarova", "koala", "Ingliz tili", 0),
         ]
 
         conn = get_db()
         try:
             for name, avatar, bio, verified in users:
                 conn.execute(
-                    "INSERT INTO users(name,password_hash,avatar,bio,verified,last_seen,created_at) "
-                    "VALUES(?,?,?,?,?,?,?)",
+                    "INSERT INTO users(name,password_hash,avatar,bio,verified,last_seen,created_at) VALUES(?,?,?,?,?,?,?)",
                     (name, pwd, avatar, bio, verified, t, t)
                 )
 
             posts = [
-                (1, "Unigram'ga xush kelibsiz! 🎉", "unigram,yangilik"),
-                (2, "Dizayn darslari boshlandi 🎨", "dizayn,talim"),
-                (3, "3 oyda 10K foydalanuvchi 🚀", "startap,biznes"),
-                (4, "Python 3.12 yangi imkoniyatlari 💻", "dasturlash"),
-                (5, "Kitob almashish klubi 📚", "kitob,tadbirlar"),
-                (6, "React 19 yangiliklari 🎬", "dasturlash,react"),
-                (7, "Toshkent quyoshi ☀️", "toshkent,foto"),
-                (8, "AI yangi modellar 🤖", "ai,texnologiya"),
+                (1, "Unigram ga xush kelibsiz!", "unigram,yangilik"),
+                (2, "Dizayn darslari boshlandi", "dizayn,talim"),
+                (3, "3 oyda 10K foydalanuvchi", "startap,biznes"),
+                (4, "Python 3.12 yangi imkoniyatlari", "dasturlash"),
+                (5, "Kitob almashish klubi", "kitob,tadbirlar"),
+                (6, "React 19 yangiliklari", "dasturlash,react"),
+                (7, "Toshkent quyoshi", "toshkent,foto"),
+                (8, "AI yangi modellar", "ai,texnologiya"),
             ]
 
             for i, (uid, text, tags) in enumerate(posts):
@@ -341,11 +294,11 @@ def seed_db():
                 )
 
             groups = [
-                ("Dizaynerlar", "🎨", "UI/UX muhokamasi"),
-                ("Startapchilar", "🚀", "G'oya va MVP"),
-                ("Toshkent", "📍", "Shahar yangiliklari"),
-                ("Kitobxonlar", "📚", "Kitob tavsiyalari"),
-                ("Dasturchilar", "💻", "Kod va savollar"),
+                ("Dizaynerlar", "art", "UI/UX muhokamasi"),
+                ("Startapchilar", "rocket", "Goya va MVP"),
+                ("Toshkent", "pin", "Shahar yangiliklari"),
+                ("Kitobxonlar", "book", "Kitob tavsiyalari"),
+                ("Dasturchilar", "code", "Kod va savollar"),
             ]
 
             for name, emoji, desc in groups:
@@ -355,16 +308,15 @@ def seed_db():
                 )
 
             market = [
-                ("iPhone 15 Pro", 999, "256GB Titanium", "📱"),
-                ("MacBook Pro M3", 1999, "14 inch 16GB", "💻"),
-                ("AirPods Max", 549, "Space Gray", "🎧"),
-                ("Samsung S24", 899, "Ultra 512GB", "📱"),
+                ("iPhone 15 Pro", 999, "256GB Titanium", "phone"),
+                ("MacBook Pro M3", 1999, "14 inch 16GB", "laptop"),
+                ("AirPods Max", 549, "Space Gray", "headphones"),
+                ("Samsung S24", 899, "Ultra 512GB", "phone"),
             ]
 
             for i, (title, price, desc, emoji) in enumerate(market):
                 conn.execute(
-                    "INSERT INTO market(title,price,description,emoji,user_id,created_at) "
-                    "VALUES(?,?,?,?,?,?)",
+                    "INSERT INTO market(title,price,description,emoji,user_id,created_at) VALUES(?,?,?,?,?,?)",
                     (title, price, desc, emoji, i + 1, t)
                 )
 
@@ -374,22 +326,21 @@ def seed_db():
                         "INSERT INTO follows(follower_id,following_id,created_at) VALUES(?,?,?)",
                         (a, b, t)
                     )
-                except:
+                except Exception:
                     pass
 
             for i in range(3):
                 conn.execute(
-                    "INSERT INTO stories(user_id,emoji,text,created_at,expires_at) "
-                    "VALUES(?,?,?,?,?)",
-                    (i + 1, "🌅", f"Demo story {i + 1}", t, t + 24 * 3600000)
+                    "INSERT INTO stories(user_id,emoji,text,created_at,expires_at) VALUES(?,?,?,?,?)",
+                    (i + 1, "sun", f"Demo story {i + 1}", t, t + 24 * 3600000)
                 )
 
             conn.commit()
-            print(f"✅ Demo: {len(users)} users, {len(posts)} posts")
+            print(f"Demo data: {len(users)} users, {len(posts)} posts")
         finally:
             conn.close()
     except Exception as e:
-        print(f"⚠️ Seed xatosi: {e}")
+        print(f"Seed xatosi: {e}")
 
 
 # ============================================================================
@@ -415,9 +366,8 @@ def auth_required(fn):
 
         if now_ms() - (g.user.get("last_seen") or 0) > 60000:
             try:
-                run_sql("UPDATE users SET last_seen=? WHERE id=?",
-                        (now_ms(), g.user["id"]))
-            except:
+                run_sql("UPDATE users SET last_seen=? WHERE id=?", (now_ms(), g.user["id"]))
+            except Exception:
                 pass
 
         return fn(*args, **kwargs)
@@ -450,8 +400,12 @@ def health():
     try:
         run_sql("SELECT 1", fetch="one")
         return jsonify({
-            "ok": True, "status": "healthy",
-            "time": now_ms(), "render": IS_RENDER, "db": "ok"
+            "ok": True,
+            "status": "healthy",
+            "time": now_ms(),
+            "render": IS_RENDER,
+            "db": "ok",
+            "asgi": HAS_ASGI,
         }), 200
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
@@ -470,7 +424,7 @@ def api_register():
     data = request.get_json(silent=True) or {}
     name = (data.get("name") or "").strip()
     password = data.get("password", "")
-    avatar = (data.get("avatar") or "⭐")[:4]
+    avatar = (data.get("avatar") or "star")[:8]
 
     if len(name) < 2:
         return jsonify({"error": "Ism kamida 2 belgi"}), 400
@@ -489,7 +443,7 @@ def api_register():
     run_sql("INSERT INTO api_tokens(user_id,token,created_at) VALUES(?,?,?)",
             (uid, token, now_ms()))
 
-    print(f"✅ Yangi user: {name} (ID: {uid})")
+    print(f"Yangi user: {name} (ID: {uid})")
     return jsonify({
         "token": token,
         "user": {"id": uid, "name": name, "avatar": avatar, "verified": False}
@@ -517,8 +471,10 @@ def api_login():
     return jsonify({
         "token": token,
         "user": {
-            "id": user["id"], "name": user["name"],
-            "avatar": user["avatar"], "bio": user["bio"],
+            "id": user["id"],
+            "name": user["name"],
+            "avatar": user["avatar"],
+            "bio": user["bio"],
             "verified": bool(user["verified"])
         }
     })
@@ -535,8 +491,10 @@ def api_logout():
 @auth_required
 def api_me():
     return jsonify({
-        "id": g.user["id"], "name": g.user["name"],
-        "avatar": g.user["avatar"], "bio": g.user["bio"],
+        "id": g.user["id"],
+        "name": g.user["name"],
+        "avatar": g.user["avatar"],
+        "bio": g.user["bio"],
         "verified": bool(g.user["verified"])
     })
 
@@ -547,7 +505,7 @@ def api_update_me():
     data = request.get_json(silent=True) or {}
     if "avatar" in data:
         run_sql("UPDATE users SET avatar=? WHERE id=?",
-                (str(data["avatar"])[:4], g.user["id"]))
+                (str(data["avatar"])[:8], g.user["id"]))
     if "bio" in data:
         run_sql("UPDATE users SET bio=? WHERE id=?",
                 (str(data["bio"])[:200], g.user["id"]))
@@ -582,15 +540,13 @@ def post_dict(row, me_id=None):
 
     return {
         "id": p["id"],
-        "type": p.get("type", "post"),
         "authorId": p["user_id"],
         "authorName": author["name"] if author else "Deleted",
-        "avatar": author["avatar"] if author else "⭐",
+        "avatar": author["avatar"] if author else "star",
         "verified": bool(author["verified"]) if author else False,
         "text": p["text"],
         "image": p["image_url"],
         "tags": p["tags"].split(",") if p["tags"] else [],
-        "views": p.get("views", 0),
         "at": p["created_at"],
         "likes": likes,
         "liked": my_reaction is not None,
@@ -618,7 +574,7 @@ def api_create_post():
     text = (data.get("text") or "").strip()
 
     if not text:
-        return jsonify({"error": "Bo'sh post"}), 400
+        return jsonify({"error": "Bosh post"}), 400
     if len(text) > 5000:
         return jsonify({"error": "Post juda uzun"}), 400
 
@@ -636,7 +592,7 @@ def api_create_post():
                     if ext in ("png", "jpg", "gif", "webp"):
                         raw = base64.b64decode(data_b64)
                         if len(raw) < 4 * 1024 * 1024:
-                            fname = f"post_{secrets.token_hex(10)}.{ext}"
+                            fname = "post_" + secrets.token_hex(10) + "." + ext
                             with open(os.path.join(UPLOAD_DIR, fname), "wb") as f:
                                 f.write(raw)
                             image_url = "/uploads/" + fname
@@ -661,7 +617,7 @@ def api_delete_post(pid):
     if not row:
         return jsonify({"error": "Topilmadi"}), 404
     if row["user_id"] != g.user["id"]:
-        return jsonify({"error": "Ruxsat yo'q"}), 403
+        return jsonify({"error": "Ruxsat yoq"}), 403
     run_sql("UPDATE posts SET deleted_at=? WHERE id=?", (now_ms(), pid))
     return jsonify({"ok": True})
 
@@ -670,7 +626,7 @@ def api_delete_post(pid):
 @auth_required
 def api_react(pid):
     data = request.get_json(silent=True) or {}
-    emoji = (data.get("emoji") or "❤️")[:8]
+    emoji = (data.get("emoji") or "heart")[:16]
 
     existing = run_sql(
         "SELECT emoji FROM reactions WHERE post_id=? AND user_id=?",
@@ -722,7 +678,7 @@ def api_comment(pid):
     text = (data.get("text") or "").strip()[:1000]
 
     if not text:
-        return jsonify({"error": "Izoh bo'sh"}), 400
+        return jsonify({"error": "Izoh bosh"}), 400
 
     cid = run_sql(
         "INSERT INTO comments(post_id,user_id,text,created_at) VALUES(?,?,?,?)",
@@ -800,7 +756,7 @@ def api_people():
 @auth_required
 def api_follow(uid):
     if uid == g.user["id"]:
-        return jsonify({"error": "O'zingizni kuzatolmaysiz"}), 400
+        return jsonify({"error": "Ozingizni kuzatolmaysiz"}), 400
 
     existing = run_sql(
         "SELECT 1 FROM follows WHERE follower_id=? AND following_id=?",
@@ -812,10 +768,8 @@ def api_follow(uid):
                 (g.user["id"], uid))
         following = False
     else:
-        run_sql(
-            "INSERT INTO follows(follower_id,following_id,created_at) VALUES(?,?,?)",
-            (g.user["id"], uid, now_ms())
-        )
+        run_sql("INSERT INTO follows(follower_id,following_id,created_at) VALUES(?,?,?)",
+                (g.user["id"], uid, now_ms()))
         following = True
 
     cnt = run_sql("SELECT COUNT(*) FROM follows WHERE following_id=?",
@@ -849,9 +803,12 @@ def api_groups():
             joined = j is not None
 
         result.append({
-            "id": r["id"], "name": r["name"],
-            "emoji": r["emoji"], "desc": r["description"],
-            "members": member_count, "joined": joined,
+            "id": r["id"],
+            "name": r["name"],
+            "emoji": r["emoji"],
+            "desc": r["description"],
+            "members": member_count,
+            "joined": joined,
         })
 
     return jsonify(result)
@@ -868,7 +825,7 @@ def api_create_group():
 
     gid = run_sql(
         "INSERT INTO groups_t(name,emoji,description,created_at) VALUES(?,?,?,?)",
-        (name, (data.get("emoji") or "👥")[:4],
+        (name, (data.get("emoji") or "grp")[:8],
          (data.get("desc") or "")[:300], now_ms())
     )
 
@@ -916,7 +873,7 @@ def api_chats():
     result = []
     for r in rows:
         if r["is_ai"]:
-            name, avatar, kind = "Unigram AI", "🤖", "ai"
+            name, avatar, kind = "Unigram AI", "robot", "ai"
         else:
             other = r["user2_id"] if r["user1_id"] == me else r["user1_id"]
             u = run_sql("SELECT name, avatar FROM users WHERE id=?",
@@ -931,8 +888,11 @@ def api_chats():
         )
 
         result.append({
-            "id": r["id"], "name": name, "avatar": avatar,
-            "kind": kind, "last": last["text"] if last else "Xabar yo'q",
+            "id": r["id"],
+            "name": name,
+            "avatar": avatar,
+            "kind": kind,
+            "last": last["text"] if last else "Xabar yoq",
         })
 
     result.sort(key=lambda x: (x["kind"] != "ai", -x["id"]))
@@ -953,7 +913,7 @@ def api_chat_ai():
         )
         run_sql(
             "INSERT INTO messages(chat_id,sender_id,text,created_at) VALUES(?,?,?,?)",
-            (cid, 0, "Salom! Men Unigram AI man. Menga savol bering 🙂", now_ms())
+            (cid, 0, "Salom! Men Unigram AI man. Menga savol bering.", now_ms())
         )
         row = run_sql("SELECT * FROM chats WHERE id=?", (cid,), fetch="one")
 
@@ -965,7 +925,7 @@ def api_chat_ai():
 def api_chat_with(uid):
     me = g.user["id"]
     if uid == me:
-        return jsonify({"error": "O'zingiz bilan chat yo'q"}), 400
+        return jsonify({"error": "Ozingiz bilan chat yoq"}), 400
 
     a, b = (me, uid) if me < uid else (uid, me)
     row = run_sql(
@@ -986,18 +946,18 @@ def api_chat_with(uid):
 def ai_reply(text):
     t = (text or "").lower()
     if any(k in t for k in ["salom", "assalom", "hey", "hi", "qalay"]):
-        return "Salom! Qalaysiz? 😊"
+        return "Salom! Qalaysiz?"
     if "trend" in t or "top" in t:
-        return "Trend Top bo'limida eng qizg'in postlar 🔥"
+        return "Trend Top bolimida eng qizgin postlar"
     if "guruh" in t:
-        return "Guruhlar bo'limida jamoa toping 👥"
+        return "Guruhlar bolimida jamoa toping"
     if "bozor" in t or "narx" in t:
-        return "Bozor bo'limida e'lon joylashingiz mumkin 🛍️"
+        return "Bozor bolimida elon joylashingiz mumkin"
     if "rahmat" in t:
-        return "Arzimaydi! 😊"
+        return "Arzimaydi!"
     if "?" in t:
-        return "Yaxshi savol! Demo versiyada oddiy javob beraman 🤖"
-    return "Tushundim 👍"
+        return "Yaxshi savol! Demo versiyada oddiy javob beraman"
+    return "Tushundim"
 
 
 @flask_app.route("/api/chats/<int:cid>/messages")
@@ -1027,8 +987,12 @@ def api_messages(cid):
     )
 
     return jsonify([
-        {"id": r["id"], "from": "me" if r["sender_id"] == me else "them",
-         "text": r["text"], "at": r["created_at"]}
+        {
+            "id": r["id"],
+            "from": "me" if r["sender_id"] == me else "them",
+            "text": r["text"],
+            "at": r["created_at"],
+        }
         for r in rows
     ])
 
@@ -1041,7 +1005,7 @@ def api_send_message(cid):
     text = (data.get("text") or "").strip()[:2000]
 
     if not text:
-        return jsonify({"error": "Xabar bo'sh"}), 400
+        return jsonify({"error": "Xabar bosh"}), 400
 
     chat = run_sql(
         "SELECT 1 FROM chats WHERE id=? AND (user1_id=? OR user2_id=?)",
@@ -1081,10 +1045,16 @@ def api_stories():
 
     return jsonify([
         {
-            "id": r["id"], "userId": r["user_id"], "who": r["name"],
-            "av": r["avatar"], "emoji": r["emoji"], "text": r["text"],
-            "image": r["image_url"], "isMine": r["user_id"] == me_id,
-            "seen": r["id"] in seen_ids, "at": r["created_at"],
+            "id": r["id"],
+            "userId": r["user_id"],
+            "who": r["name"],
+            "av": r["avatar"],
+            "emoji": r["emoji"],
+            "text": r["text"],
+            "image": r["image_url"],
+            "isMine": r["user_id"] == me_id,
+            "seen": r["id"] in seen_ids,
+            "at": r["created_at"],
         }
         for r in rows
     ])
@@ -1095,7 +1065,7 @@ def api_stories():
 def api_create_story():
     data = request.get_json(silent=True) or {}
     text = (data.get("text") or "").strip()[:200]
-    emoji = (data.get("emoji") or "✨")[:4]
+    emoji = (data.get("emoji") or "star")[:8]
 
     if not text:
         return jsonify({"error": "Matn kerak"}), 400
@@ -1114,7 +1084,7 @@ def api_view_story(sid):
     try:
         run_sql("INSERT INTO story_views(story_id,user_id) VALUES(?,?)",
                 (sid, g.user["id"]))
-    except:
+    except Exception:
         pass
     return jsonify({"ok": True})
 
@@ -1133,9 +1103,13 @@ def api_market():
 
     return jsonify([
         {
-            "id": r["id"], "title": r["title"], "price": r["price"],
-            "desc": r["description"], "emoji": r["emoji"],
-            "seller": r["seller_name"], "at": r["created_at"],
+            "id": r["id"],
+            "title": r["title"],
+            "price": r["price"],
+            "desc": r["description"],
+            "emoji": r["emoji"],
+            "seller": r["seller_name"],
+            "at": r["created_at"],
         }
         for r in rows
     ])
@@ -1151,11 +1125,10 @@ def api_create_market():
         return jsonify({"error": "Nom kerak"}), 400
 
     mid = run_sql(
-        "INSERT INTO market(title,price,description,emoji,user_id,created_at) "
-        "VALUES(?,?,?,?,?,?)",
+        "INSERT INTO market(title,price,description,emoji,user_id,created_at) VALUES(?,?,?,?,?,?)",
         (title, int(data.get("price", 0) or 0),
          (data.get("desc") or "")[:500],
-         (data.get("emoji") or "📦")[:4],
+         (data.get("emoji") or "box")[:8],
          g.user["id"], now_ms())
     )
 
@@ -1182,42 +1155,38 @@ def api_search():
             "SELECT * FROM posts WHERE deleted_at IS NULL "
             "AND (LOWER(text) LIKE ? OR LOWER(tags) LIKE ?) "
             "ORDER BY created_at DESC LIMIT 50",
-            (f"%{q}%", f"%{q_clean}%"), fetch="all"
+            ("%" + q + "%", "%" + q_clean + "%"), fetch="all"
         )
         return jsonify([post_dict(r, me_id) for r in rows])
 
     if tab == "people":
         rows = run_sql(
             "SELECT * FROM users WHERE LOWER(name) LIKE ? OR LOWER(bio) LIKE ? LIMIT 30",
-            (f"%{q}%", f"%{q}%"), fetch="all"
+            ("%" + q + "%", "%" + q + "%"), fetch="all"
         )
         return jsonify([
-            {"id": r["id"], "name": r["name"], "avatar": r["avatar"],
-             "bio": r["bio"], "verified": bool(r["verified"])}
+            {
+                "id": r["id"],
+                "name": r["name"],
+                "avatar": r["avatar"],
+                "bio": r["bio"],
+                "verified": bool(r["verified"]),
+            }
             for r in rows
         ])
 
     if tab == "groups":
         rows = run_sql(
             "SELECT * FROM groups_t WHERE LOWER(name) LIKE ? OR LOWER(description) LIKE ? LIMIT 30",
-            (f"%{q}%", f"%{q}%"), fetch="all"
+            ("%" + q + "%", "%" + q + "%"), fetch="all"
         )
         return jsonify([
-            {"id": r["id"], "name": r["name"], "emoji": r["emoji"],
-             "desc": r["description"]}
-            for r in rows
-        ])
-
-    if tab == "market":
-        rows = run_sql(
-            "SELECT m.*, u.name AS seller_name FROM market m JOIN users u ON u.id=m.user_id "
-            "WHERE LOWER(m.title) LIKE ? OR LOWER(m.description) LIKE ? LIMIT 30",
-            (f"%{q}%", f"%{q}%"), fetch="all"
-        )
-        return jsonify([
-            {"id": r["id"], "title": r["title"], "price": r["price"],
-             "desc": r["description"], "emoji": r["emoji"],
-             "seller": r["seller_name"]}
+            {
+                "id": r["id"],
+                "name": r["name"],
+                "emoji": r["emoji"],
+                "desc": r["description"],
+            }
             for r in rows
         ])
 
@@ -1235,8 +1204,13 @@ def api_notifications():
         (g.user["id"],), fetch="all"
     )
     return jsonify([
-        {"id": r["id"], "kind": r["kind"], "text": r["text"],
-         "read": bool(r["read"]), "at": r["created_at"]}
+        {
+            "id": r["id"],
+            "kind": r["kind"],
+            "text": r["text"],
+            "read": bool(r["read"]),
+            "at": r["created_at"],
+        }
         for r in rows
     ])
 
@@ -1306,7 +1280,7 @@ def serve_index():
         "name": "Unigram",
         "status": "running",
         "version": "5.0.0",
-        "message": "Backend ishlayapti ✅",
+        "message": "Backend ishlayapti",
         "endpoints": {
             "health": "GET /health",
             "version": "GET /api/version",
@@ -1319,7 +1293,7 @@ def serve_index():
         "demo": {
             "user": "Dilnoza Karimova",
             "password": "demo123",
-        }
+        },
     })
 
 
@@ -1348,53 +1322,44 @@ def error_413(e):
 
 @flask_app.errorhandler(500)
 def error_500(e):
-    print(f"❌ 500: {e}")
+    print(f"500 xato: {e}")
     return jsonify({"error": "Server xatosi"}), 500
 
 
 # ============================================================================
-# ASGI WRAPPER — uvicorn uchun
+# ASGI WRAPPER
 # ============================================================================
 if HAS_ASGI:
-    # uvicorn main:app → ishlaydi (ASGI)
     app = WsgiToAsgi(flask_app)
-    print("✅ ASGI wrapper tayyor: uvicorn main:app ishlaydi")
+    print("ASGI wrapper tayyor: uvicorn main:app ishlaydi")
 else:
-    # asgiref yo'q bo'lsa — faqat gunicorn main:flask_app ishlaydi
     app = flask_app
-    print("⚠️ asgiref yo'q — faqat gunicorn ishlaydi")
+    print("ASGI yoq: faqat gunicorn ishlaydi")
 
 
 # ============================================================================
-# BOOTSTRAP — Render import vaqtida ham ishlaydi
+# BOOTSTRAP
 # ============================================================================
-print("🔧 Baza ishga tushirilmoqda...")
-init_db()
-seed_db()
-print("✅ Bootstrap muvaffaqiyatli")
-print("=" * 62)
+try:
+    init_db()
+    seed_db()
+    print("Bootstrap muvaffaqiyatli")
+except Exception as e:
+    print(f"Bootstrap xatosi: {e}")
+
+print("=" * 60)
 
 
 # ============================================================================
 # MAIN
 # ============================================================================
 if __name__ == "__main__":
-    # Lokal ishga tushirish — uvicorn ishlatamiz
     if HAS_ASGI:
         try:
             import uvicorn
-            print(f"🌐 http://localhost:{PORT}")
-            print(f"🏥 http://localhost:{PORT}/health")
-            uvicorn.run(
-                "main:app",
-                host=HOST,
-                port=PORT,
-                log_level="info",
-                reload=False,
-            )
+            print(f"http://localhost:{PORT}")
+            uvicorn.run("main:app", host=HOST, port=PORT, log_level="info")
         except ImportError:
-            print("⚠️ uvicorn yo'q, Flask dev server...")
             flask_app.run(host=HOST, port=PORT, debug=False, threaded=True)
     else:
-        print(f"🌐 http://localhost:{PORT}")
         flask_app.run(host=HOST, port=PORT, debug=False, threaded=True)
